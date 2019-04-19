@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tao.OpenGl;
 
-namespace Graphics._3D_Models
+namespace Graphics
 {
     
     enum animType
@@ -56,6 +56,91 @@ namespace Graphics._3D_Models
         public int next_frame;             // next frame
 
     }
+
+    enum animType_LOL
+    {
+        STAND,
+        ATTACK1,
+        ATTACK2,
+        RUN,
+        DEATH,
+        SPELL1,
+        SPELL2,
+        MAX_ANIMATIONS
+
+    }
+
+    struct animState_t
+    {
+
+        public int startframe;             // first frame
+        public int endframe;               // last frame
+        public int fps;                    // frame per second for this animation
+
+        public float curr_time;                // current time
+        public float old_time;             // old time
+        public float interpol;             // percent of interpolation
+
+        public animType_LOL type;                   // animation type
+
+        public int curr_frame;             // current frame
+        public int next_frame;             // next frame
+
+    }
+
+    struct vertex_t
+    {
+
+        public byte[] v;                // compressed vertex (x, y, z) coordinates
+        public byte lightnormalindex;    // index to a normal vector for the lighting
+
+    }
+
+    struct frame_t
+    {
+
+        public float[] scale;       // scale values
+        public float[] translate;   // translation vector
+        public char[] name;       // frame name
+        public List<vertex_t> verts;       // first vertex of this frame
+
+    }
+
+    struct md2_t
+    {
+
+        public int ident;              // magic number. must be equal to "IDP2"
+        public int version;            // md2 version. must be equal to 8
+
+        public int skinwidth;          // width of the texture
+        public int skinheight;         // height of the texture
+        public int framesize;          // size of one frame in bytes
+
+        public int num_skins;          // number of textures
+        public int num_xyz;            // number of vertices
+        public int num_st;             // number of texture coordinates
+        public int num_tris;           // number of triangles
+        public int num_glcmds;         // number of opengl commands
+        public int num_frames;         // total number of frames
+
+        public int ofs_skins;          // offset to skin names (64 bytes each)
+        public int ofs_st;             // offset to s-t texture coordinates
+        public int ofs_tris;           // offset to triangles
+        public int ofs_frames;         // offset to frame data
+        public int ofs_glcmds;         // offset to opengl commands
+        public int ofs_end;            // offset to end of file
+
+    }
+
+    struct anim_t
+    {
+
+        public int first_frame;            // first frame of the animation
+        public int last_frame;             // number of frames
+        public int fps;                    // number of frames per second
+
+    }
+
 
     class md2
     {

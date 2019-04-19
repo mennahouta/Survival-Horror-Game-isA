@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 using Tao.OpenGl;
 using GlmNet;
 using System.IO;
-using Graphics._3D_Models;
+
 namespace Graphics
 {
     class Renderer
     {
-        #region Shaders
+        #region Shaders decleration
         Shader sh;
         #endregion
 
-        #region Matricies
+        #region Matricies decleration
         int transID, viewID, projID;
         mat4 ProjectionMatrix, ViewMatrix, modelmatrix;
         #endregion
@@ -24,13 +24,27 @@ namespace Graphics
         int EyePositionID,  AmbientLightID, DataID;
 
         public Camera cam;
-
+        
         public float Speed = 1;
 
+        #region 3D Models decleration
+        #region Bedroom
+        md2 bed;
+        #endregion
 
-        //uint vertexBufferID;
-        //public md2LOL m;
-        //Texture tex1;
+        #region Bathroom
+        md2 sink;
+        #endregion
+
+        #region Kitchen
+        #endregion
+
+        #region Living Room
+        #endregion
+
+        #region Bedroom2
+        #endregion
+        #endregion
 
         public void Initialize()
         {
@@ -58,7 +72,30 @@ namespace Graphics
 
             sh.UseShader();
 
-            #region 3D Models
+            #region 3D Models intialization
+            #region Bedroom
+            bed = new md2(projectPath + "\\ModelFiles\\BED.md2");
+            bed.StartAnimation(animType.STAND);
+            bed.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+            bed.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
+            #endregion
+
+            #region Bathroom
+            sink = new md2(projectPath + "\\ModelFiles\\SINK.md2");
+            sink.StartAnimation(animType.STAND);
+            sink.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+            sink.TranslationMatrix = glm.translate(new mat4(1), new vec3(40, -1, 10));
+
+            #endregion
+
+            #region Kitchen
+            #endregion
+
+            #region Living Room
+            #endregion
+
+            #region Bedroom2
+            #endregion
             #endregion
 
             Gl.glEnable(Gl.GL_DEPTH_TEST);
@@ -68,12 +105,29 @@ namespace Graphics
         public void Draw()
         {
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT|Gl.GL_DEPTH_BUFFER_BIT);
-            sh.UseShader();
 
             Gl.glUniformMatrix4fv(projID, 1, Gl.GL_FALSE, ProjectionMatrix.to_array());
             Gl.glUniformMatrix4fv(viewID, 1, Gl.GL_FALSE, ViewMatrix.to_array());
-            
-            #region 3D Models
+
+            sh.UseShader();
+
+            #region 3D Models drawing
+            #region Bedroom
+            bed.Draw(transID);
+            #endregion
+
+            #region Bathroom
+            sink.Draw(transID);
+            #endregion
+
+            #region Kitchen
+            #endregion
+
+            #region Living Room
+            #endregion
+
+            #region Bedroom2
+            #endregion
             #endregion
         }
         public void Update(float deltaTime)

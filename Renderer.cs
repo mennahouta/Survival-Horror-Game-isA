@@ -53,6 +53,9 @@ namespace Graphics
 
         int num_grass;
         Model3D[] Grass;
+
+        int num_barrels;
+        md2[] Barrels;
         #endregion
 
         public void Initialize()
@@ -106,7 +109,7 @@ namespace Graphics
             car.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
             car.TranslationMatrix = glm.translate(new mat4(1), new vec3(200, 300, 800));
             float car_radius = 5f;
-            vec3 car_pos = new vec3(200, 300, 800);
+            vec3 car_pos = new vec3(200, 0, 800);
             #endregion
 
             #region Trees Models
@@ -140,9 +143,9 @@ namespace Graphics
                 Lights[i] = new md2(projectPath + "\\ModelFiles\\LIGHT6.md2");
                 Lights[i].scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.3f));
                 Lights[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-                int x = random.Next(-500, 500);
+                int x = random.Next(10, 990);
                 int y = 0;
-                int z = random.Next(-500, 500);
+                int z = random.Next(10, 990);
                 vec3 pos = new vec3(x, y, z);
 
                 float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
@@ -152,6 +155,27 @@ namespace Graphics
                     z -= (int)(2 * car_radius);
                 }
                 Lights[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
+            }
+            #endregion
+
+            #region Barrels Models
+            num_barrels = random.Next(10, 15);
+            Barrels = new md2[num_barrels];
+            for (int i = 0; i < num_barrels; i++) {
+                Barrels[i] = new md2(projectPath + "\\ModelFiles\\ton\\ton.md2");
+                Barrels[i].scaleMatrix = glm.scale(new mat4(1), new vec3(1, 1, 1));
+                Barrels[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+                int x = random.Next(10, 990);
+                int y = 0;
+                int z = random.Next(10, 990);
+                vec3 pos = new vec3(x, y, z);
+
+                float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
+                if (dist <= car_radius) {
+                    x -= (int)(2 * car_radius);
+                    z -= (int)(2 * car_radius);
+                }
+                Barrels[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
             }
             #endregion
 
@@ -387,6 +411,9 @@ namespace Graphics
             {
                 Grass[i].Draw(transID);
             }
+
+            for (int i = 0; i < num_barrels; i++)
+                Barrels[i].Draw(transID);
             #endregion
         }
         public void Update(float deltaTime)

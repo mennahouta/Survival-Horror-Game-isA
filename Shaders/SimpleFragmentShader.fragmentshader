@@ -1,0 +1,44 @@
+﻿#version 330 core
+
+in vec3 fragColor;
+
+out vec3 color;
+
+in vec2 TexCoord;
+uniform sampler2D myTextureSampler;
+
+
+//read out values from vertex shader
+
+
+//define light variables (light position, eye position, ambientlight, specular & attenuation)
+
+
+void main()
+{
+	vec3 textureColor = texture( myTextureSampler, TexCoord ).rgb;
+
+
+	//L = (Lp-pos)/||(Lp-pos)||
+	//cos(θ) = L.N
+	//diffuse = ambientlight*Kd*cos(θ)
+
+	//Specular light calculations.
+	//R = reflect(-L,N)
+	//E = (eyepos - pos)/||(eyepos - pos)||
+	//cos(ϕ) = R.E
+	//specular = ambientlight*Ks*cos(ϕ)^ns
+
+	//compute attenuation
+
+	//d = |distance(pos,Lp)|
+	//att = 1-(d/r)    where r is maximum distance
+	//if att < 0 then let att = 0
+	//color = ambientlight + (diffuse+specular)*att
+	
+	//color *= texture
+	
+	
+	color = textureColor;
+
+}

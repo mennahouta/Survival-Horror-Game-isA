@@ -1,0 +1,28 @@
+#version 330 core
+
+
+layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 1) in vec3 vertexColor;
+layout(location = 2) in vec2 texCoord;
+//read normals
+
+uniform mat4 trans;
+uniform mat4 projection;
+uniform mat4 view;
+
+out vec3 fragColor;
+out vec2 TexCoord;
+
+//out normal_world and position_world
+
+void main(){
+
+	gl_Position =  projection*view*trans * vec4(vertexPosition_modelspace,1);
+	fragColor = vertexColor;
+	TexCoord = texCoord;
+	
+	//compute position world 
+	//compute normal world 
+}
+
+

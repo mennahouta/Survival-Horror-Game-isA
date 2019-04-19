@@ -89,26 +89,26 @@ namespace Graphics
         public void Walk(float dist)
         {
             vec3 newPosition = mPosition + dist * mDirection;
-            if (newPosition.x > 0 && newPosition.x < 990 &&
-                newPosition.y > 0 && newPosition.y < 990 &&
-                newPosition.z > 0 && newPosition.z < 990)
+            if (newPosition.x > 3 && newPosition.x < 997 &&
+                newPosition.y > 3 && newPosition.y < 997 &&
+                newPosition.z > 3 && newPosition.z < 997)
                     mPosition = newPosition;
         }
         public void Strafe(float dist)
         {
             vec3 newPosition = mPosition + dist * mRight;
-            if (newPosition.x > 0 && newPosition.x < 990 &&
-                newPosition.y > 0 && newPosition.y < 990 &&
-                newPosition.z > 0 && newPosition.z < 990)
-                    mPosition = newPosition;
+            if (newPosition.x > 3 && newPosition.x < 997 &&
+                newPosition.y > 3 && newPosition.y < 997 &&
+                newPosition.z > 3 && newPosition.z < 997)
+                mPosition = newPosition;
         }
         public void Fly(float dist)
         {
             vec3 newPosition = mPosition + dist * mUp;
-            if (newPosition.x > 0 && newPosition.x < 990 &&
-                newPosition.y > 0 && newPosition.y < 990 &&
-                newPosition.z > 0 && newPosition.z < 990)
-                    mPosition = newPosition;
+            if (newPosition.x > 3 && newPosition.x < 997 &&
+                newPosition.y > 3 && newPosition.y < 997 &&
+                newPosition.z > 3 && newPosition.z < 997)
+                mPosition = newPosition;
         }
     }
 }

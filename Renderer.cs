@@ -92,9 +92,9 @@ namespace Graphics
                 Grass[i].LoadFile(projectPath + "\\ModelFiles\\grass", 4, "grass0" + (char)(rnd + '0') + ".3ds");
                 Grass[i].rotmatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
                 Grass[i].scalematrix = glm.scale(new mat4(1), new vec3(5f, 5f, 5f));
-                int x = random.Next(-500, 500);
+                int x = random.Next(10, 990);
                 int y = 0;
-                int z = random.Next(-500, 500);
+                int z = random.Next(10, 990);
                 Grass[i].transmatrix = glm.translate(new mat4(1), new vec3(x, y, z));
             }
             #endregion
@@ -104,9 +104,9 @@ namespace Graphics
             car.StartAnimation(animType.STAND);
             car.scaleMatrix = glm.scale(new mat4(1), new vec3(0.2f, 0.2f, 0.2f));
             car.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            car.TranslationMatrix = glm.translate(new mat4(1), new vec3(-20, 0, 50));
+            car.TranslationMatrix = glm.translate(new mat4(1), new vec3(200, 300, 800));
             float car_radius = 5f;
-            vec3 car_pos = new vec3(-20, 0, 50);
+            vec3 car_pos = new vec3(200, 300, 800);
             #endregion
 
             #region Trees Models
@@ -117,9 +117,9 @@ namespace Graphics
                 Trees[i] = new Model3D();
                 Trees[i].LoadFile(projectPath + "\\ModelFiles\\tree", 1, "Tree.obj");
                 Trees[i].scalematrix = glm.scale(new mat4(1), new vec3(13, 30, 10));
-                int x = random.Next(-500, 500);
+                int x = random.Next(10, 990);
                 int y = 0;
-                int z = random.Next(-500, 500);
+                int z = random.Next(10, 990);
                 vec3 pos = new vec3(x, y, z);
 
                 float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));

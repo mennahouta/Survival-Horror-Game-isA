@@ -12,11 +12,13 @@ namespace Graphics
 {
     class Renderer
     {
-        #region Shaders decleration
+        public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+
+        #region Shaders declaration
         Shader sh;
         #endregion
 
-        #region Matricies decleration
+        #region Matricies declaration
         int transID, viewID, projID;
         mat4 ProjectionMatrix, ViewMatrix, modelmatrix;
         #endregion
@@ -27,7 +29,9 @@ namespace Graphics
         
         public float Speed = 1;
 
-        #region 3D Models decleration
+        Skybox skybox;
+      
+        #region 3D Models declaration
         
         #region md2 models
         /*
@@ -52,19 +56,15 @@ namespace Graphics
         #endregion
 
         public void Initialize()
-        {
-
-            string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-
+        {   
             #region Shaders intialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
             #endregion
 
-
             Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
-            cam.Reset(0, 20, 50, 0, 0, 0, 0, 1, 0);
+            cam.Reset(20, 50, 150, 30, 400, 300, 0, 1, 0);
 
             ProjectionMatrix = cam.GetProjectionMatrix();
             ViewMatrix = cam.GetViewMatrix();
@@ -77,6 +77,8 @@ namespace Graphics
 
             sh.UseShader();
 
+            skybox = new Skybox();
+          
             Random random = new Random();
             #region 3D Models intialization
 
@@ -339,6 +341,8 @@ namespace Graphics
             Gl.glUniformMatrix4fv(viewID, 1, Gl.GL_FALSE, ViewMatrix.to_array());
 
             sh.UseShader();
+
+            skybox.Draw(transID);
 
             #region 3D Models drawing
             #region working models

@@ -56,7 +56,6 @@ namespace Graphics
         public int next_frame;             // next frame
 
     }
-
     enum animType_LOL
     {
         STAND,
@@ -69,7 +68,6 @@ namespace Graphics
         MAX_ANIMATIONS
 
     }
-
     struct animState_t
     {
 
@@ -87,7 +85,6 @@ namespace Graphics
         public int next_frame;             // next frame
 
     }
-
     struct vertex_t
     {
 
@@ -95,7 +92,6 @@ namespace Graphics
         public byte lightnormalindex;    // index to a normal vector for the lighting
 
     }
-
     struct frame_t
     {
 
@@ -105,7 +101,6 @@ namespace Graphics
         public List<vertex_t> verts;       // first vertex of this frame
 
     }
-
     struct md2_t
     {
 
@@ -131,7 +126,6 @@ namespace Graphics
         public int ofs_end;            // offset to end of file
 
     }
-
     struct anim_t
     {
 
@@ -140,7 +134,6 @@ namespace Graphics
         public int fps;                    // number of frames per second
 
     }
-
 
     class md2
     {

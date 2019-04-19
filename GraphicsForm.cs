@@ -15,6 +15,11 @@ namespace Graphics
         public GraphicsForm()
         {
             InitializeComponent();
+            #region Full-Screen
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Size = GetScreen().Size;
+            simpleOpenGlControl1.Size = this.Size;
+            #endregion
             simpleOpenGlControl1.InitializeContexts();
 
             MoveCursor();
@@ -22,9 +27,10 @@ namespace Graphics
 
             initialize();
             deltaTime = 0.005f;
+            #region Threads
             MainLoopThread = new Thread(MainLoop);
             MainLoopThread.Start();
-
+            #endregion
         }
         void initialize()
         {
@@ -105,6 +111,11 @@ namespace Graphics
             Cursor.Clip = new Rectangle(this.Location, this.Size);
             prevX = simpleOpenGlControl1.Location.X+simpleOpenGlControl1.Size.Width/2;
             prevY = simpleOpenGlControl1.Location.Y + simpleOpenGlControl1.Size.Height / 2;
+        }
+
+        public Rectangle GetScreen()
+        {
+            return Screen.FromControl(this).Bounds;
         }
     }
 }

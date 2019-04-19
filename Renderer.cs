@@ -12,11 +12,13 @@ namespace Graphics
 {
     class Renderer
     {
-        #region Shaders decleration
+        public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+
+        #region Shaders declaration
         Shader sh;
         #endregion
 
-        #region Matricies decleration
+        #region Matricies declaration
         int transID, viewID, projID;
         mat4 ProjectionMatrix, ViewMatrix, modelmatrix;
         #endregion
@@ -27,39 +29,18 @@ namespace Graphics
         
         public float Speed = 1;
 
-        #region 3D Models decleration
-        #region Bedroom
-        md2 bed;
-        #endregion
-
-        #region Bathroom
-        md2 sink;
-        #endregion
-
-        #region Kitchen
-        #endregion
-
-        #region Living Room
-        #endregion
-
-        #region Bedroom2
-        #endregion
-        #endregion
+        Skybox skybox;
 
         public void Initialize()
-        {
-
-            string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-
+        {   
             #region Shaders intialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
             #endregion
 
-
             Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
-            cam.Reset(0, 34, 100, 0, 0, 0, 0, 1, 0);
+            cam.Reset(20, 50, 150, 30, 400, 300, 0, 1, 0);
 
             ProjectionMatrix = cam.GetProjectionMatrix();
             ViewMatrix = cam.GetViewMatrix();
@@ -72,31 +53,7 @@ namespace Graphics
 
             sh.UseShader();
 
-            #region 3D Models intialization
-            #region Bedroom
-            bed = new md2(projectPath + "\\ModelFiles\\BED.md2");
-            bed.StartAnimation(animType.STAND);
-            bed.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            bed.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            #endregion
-
-            #region Bathroom
-            sink = new md2(projectPath + "\\ModelFiles\\SINK.md2");
-            sink.StartAnimation(animType.STAND);
-            sink.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            sink.TranslationMatrix = glm.translate(new mat4(1), new vec3(40, -1, 10));
-
-            #endregion
-
-            #region Kitchen
-            #endregion
-
-            #region Living Room
-            #endregion
-
-            #region Bedroom2
-            #endregion
-            #endregion
+            skybox = new Skybox();
 
             Gl.glEnable(Gl.GL_DEPTH_TEST);
             Gl.glDepthFunc(Gl.GL_LESS);
@@ -111,24 +68,8 @@ namespace Graphics
 
             sh.UseShader();
 
-            #region 3D Models drawing
-            #region Bedroom
-            bed.Draw(transID);
-            #endregion
+            skybox.Draw(transID);
 
-            #region Bathroom
-            sink.Draw(transID);
-            #endregion
-
-            #region Kitchen
-            #endregion
-
-            #region Living Room
-            #endregion
-
-            #region Bedroom2
-            #endregion
-            #endregion
         }
         public void Update(float deltaTime)
         {

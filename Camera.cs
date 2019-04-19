@@ -88,15 +88,27 @@ namespace Graphics
 
         public void Walk(float dist)
         {
-            mPosition += dist * mDirection;
+            vec3 newPosition = mPosition + dist * mDirection;
+            if (newPosition.x > 0 && newPosition.x < 990 &&
+                newPosition.y > 0 && newPosition.y < 990 &&
+                newPosition.z > 0 && newPosition.z < 990)
+                    mPosition = newPosition;
         }
         public void Strafe(float dist)
         {
-            mPosition += dist * mRight;
+            vec3 newPosition = mPosition + dist * mRight;
+            if (newPosition.x > 0 && newPosition.x < 990 &&
+                newPosition.y > 0 && newPosition.y < 990 &&
+                newPosition.z > 0 && newPosition.z < 990)
+                    mPosition = newPosition;
         }
         public void Fly(float dist)
         {
-            mPosition += dist * mUp;
+            vec3 newPosition = mPosition + dist * mUp;
+            if (newPosition.x > 0 && newPosition.x < 990 &&
+                newPosition.y > 0 && newPosition.y < 990 &&
+                newPosition.z > 0 && newPosition.z < 990)
+                    mPosition = newPosition;
         }
     }
 }

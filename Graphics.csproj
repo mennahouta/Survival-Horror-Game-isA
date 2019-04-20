@@ -77,8 +77,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3D Models\md2.cs" />
-    <Compile Include="3D Models\md2LOL.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="GPU.cs" />
     <Compile Include="GraphicsForm.cs">
@@ -88,8 +86,9 @@
       <DependentUpon>GraphicsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MathHelper.cs" />
+    <Compile Include="md2.cs" />
     <Compile Include="Model.cs" />
-    <Compile Include="3D Models\Model3D.cs" />
+    <Compile Include="Model3D.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Renderer.cs" />
@@ -108,7 +107,50 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="ModelFiles\zombie.md2" />
+    <None Include="ModelFiles\bag.md2" />
+    <None Include="ModelFiles\bank1.md2" />
+    <None Include="ModelFiles\barrel_plastic.md2" />
+    <None Include="ModelFiles\BED.md2" />
+    <None Include="ModelFiles\BENCH.md2" />
+    <None Include="ModelFiles\box.md2" />
+    <None Include="ModelFiles\CHAIR.md2" />
+    <None Include="ModelFiles\CHAIR1.md2" />
+    <None Include="ModelFiles\chair2.md2" />
+    <None Include="ModelFiles\chair3.md2" />
+    <None Include="ModelFiles\CLOSET.md2" />
+    <None Include="ModelFiles\coffeemaker.md2" />
+    <None Include="ModelFiles\comptable.md2" />
+    <None Include="ModelFiles\container_closed.md2" />
+    <None Include="ModelFiles\container_opened.md2" />
+    <None Include="ModelFiles\curtain.md2" />
+    <None Include="ModelFiles\curtains.md2" />
+    <None Include="ModelFiles\curtain_long.md2" />
+    <None Include="ModelFiles\deerhead.md2" />
+    <None Include="ModelFiles\desk.md2" />
+    <None Include="ModelFiles\desklamp.md2" />
+    <None Include="ModelFiles\fireplace.md2" />
+    <None Include="ModelFiles\flowerpot2.md2" />
+    <None Include="ModelFiles\HANDDRYER.md2" />
+    <None Include="ModelFiles\KAST1.md2" />
+    <None Include="ModelFiles\LAMP.md2" />
+    <None Include="ModelFiles\lantern.md2" />
+    <None Include="ModelFiles\LIGHT2.md2" />
+    <None Include="ModelFiles\LIGHT3.md2" />
+    <None Include="ModelFiles\LIGHT5.md2" />
+    <None Include="ModelFiles\LIGHT6.md2" />
+    <None Include="ModelFiles\locker2.md2" />
+    <None Include="ModelFiles\pellet.md2" />
+    <None Include="ModelFiles\SINK.md2" />
+    <None Include="ModelFiles\SOAP.md2" />
+    <None Include="ModelFiles\SODAMACHINE.md2" />
+    <None Include="ModelFiles\stleer.md2" />
+    <None Include="ModelFiles\TABLE.md2" />
+    <None Include="ModelFiles\TL.md2" />
+    <None Include="ModelFiles\TOILET.md2" />
+    <None Include="ModelFiles\TPAPER.md2" />
+    <None Include="ModelFiles\WATERDISP.md2" />
+    <None Include="ModelFiles\wc.md2" />
+    <None Include="ModelFiles\workbench.md2" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -126,10 +168,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ModelFiles\zombie.PNG" />
-    <Content Include="Textures\crate.jpg" />
-    <Content Include="Textures\Ground.jpg" />
+    <Folder Include="Textures\" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

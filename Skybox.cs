@@ -15,12 +15,12 @@ namespace Graphics
         Texture texUp, texDown, texRight, texLeft, texBack, texFront;
         public Skybox() {
             #region Skybox Textures
-            texUp = new Texture(Renderer.projectPath + "\\Textures\\rainforest_up.jpg", 0);
-            texDown = new Texture(Renderer.projectPath + "\\Textures\\rainforest_dn.jpg", 0);
-            texRight = new Texture(Renderer.projectPath + "\\Textures\\rainforest_rt.jpg", 0);
-            texLeft = new Texture(Renderer.projectPath + "\\Textures\\rainforest_lf.jpg", 0);
-            texBack = new Texture(Renderer.projectPath + "\\Textures\\rainforest_bk.jpg", 0);
-            texFront = new Texture(Renderer.projectPath + "\\Textures\\rainforest_ft.jpg", 0);
+            texUp = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_up.jpg", 0);
+            texDown = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_dn.jpg", 0);
+            texRight = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_rt.jpg", 0);
+            texLeft = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_lf.jpg", 0);
+            texBack = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_bk.jpg", 0);
+            texFront = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_ft.jpg", 0);
             #endregion
 
             #region Skybox Faces
@@ -89,7 +89,7 @@ namespace Graphics
             right.uvCoordinates.Add(new vec2(0, 0));
             right.uvCoordinates.Add(new vec2(0, 1));
 
-            right.transformationMatrix = glm.rotate(90.0f / 180.0f * 3.14f, new vec3(0, 0, 1));
+            right.transformationMatrix = glm.rotate(90.0f / 180.0f * 3.1415f, new vec3(0, 0, 1));
 
             right.Initialize();
             #endregion

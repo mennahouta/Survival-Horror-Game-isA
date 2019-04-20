@@ -29,10 +29,12 @@ namespace Graphics
         
         public float Speed = 1;
 
+        #region Skyboxes declaration
         Skybox skybox;
-      
+        #endregion
+
         #region 3D Models declaration
-        
+
         #region md2 models
         /*
         md2 bag, bank1, barrel_plastic, BENCH, box, CHAIR, CHAIR1, chair2, chair3, CLOSET;
@@ -43,21 +45,42 @@ namespace Graphics
         */
         #endregion
 
+        #region Car Model
         md2 car;
+        #endregion
 
+        #region Phone Model
         Model3D phone;
+        #endregion
 
-        int num_trees;
+        #region Trees Models
+        int num_trees, 
+            rnd_trees_L = 50, 
+            rnd_trees_H = 100;
         Model3D[] Trees;
+        #endregion
 
-        int num_lights;
+        #region Lights Models
+        int num_lights, 
+            rnd_lights_L = 20, 
+            rnd_lights_H = 50;
         md2[] Lights;
+        #endregion
 
-        int num_grass;
+        #region Grass Models
+        int num_grass, 
+            rnd_grass_L = 50, 
+            rnd_grass_H = 70;
         Model3D[] Grass;
+        #endregion
 
-        int num_barrels;
+        #region Barrels Models
+        int num_barrels, 
+            rnd_barrels_L = 10, 
+            rnd_barrels_H = 15;
         md2[] Barrels;
+        #endregion
+
         #endregion
 
         public void Initialize()
@@ -69,8 +92,9 @@ namespace Graphics
             Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
-            cam.Reset(20, 40, 150, 30, 400, 300, 0, 1, 0);
+            cam.Reset(180, 20, 800, 20, 20, 150, 0, 1, 0);
 
+            #region Matricies intialization
             ProjectionMatrix = cam.GetProjectionMatrix();
             ViewMatrix = cam.GetViewMatrix();
 
@@ -79,6 +103,7 @@ namespace Graphics
             viewID = Gl.glGetUniformLocation(sh.ID, "view");
 
             modelmatrix = glm.scale(new mat4(1), new vec3(50, 50, 50));
+            #endregion
 
             sh.UseShader();
 
@@ -96,7 +121,7 @@ namespace Graphics
             #endregion
 
             #region Grass Models
-            num_grass = random.Next(50, 70);
+            num_grass = random.Next(rnd_grass_L, rnd_grass_H);
             Grass = new Model3D[num_grass];
             for (int i = 0; i < num_grass; i++)
             {
@@ -123,7 +148,7 @@ namespace Graphics
             #endregion
 
             #region Trees Models
-            num_trees = random.Next(50, 100);
+            num_trees = random.Next(rnd_trees_L, rnd_trees_H);
             Trees = new Model3D[num_trees];
             for(int i=0; i < num_trees; i++)
             {
@@ -146,7 +171,7 @@ namespace Graphics
             #endregion
 
             #region Lights Models
-            num_lights = random.Next(20, 30);
+            num_lights = random.Next(rnd_lights_L, rnd_lights_H);
             Lights = new md2[num_lights];
             for (int i = 0; i < num_lights; i++)
             {
@@ -166,10 +191,11 @@ namespace Graphics
                 }
                 Lights[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
             }
+
             #endregion
 
             #region Barrels Models
-            num_barrels = random.Next(10, 15);
+            num_barrels = random.Next(rnd_barrels_L, rnd_barrels_H);
             Barrels = new md2[num_barrels];
             for (int i = 0; i < num_barrels; i++) {
                 Barrels[i] = new md2(projectPath + "\\ModelFiles\\ton\\ton.md2");
@@ -402,30 +428,37 @@ namespace Graphics
             //WATERDISP.Draw(transID);
             #endregion
 
+            #region Trees Models
             Gl.glEnable(Gl.GL_BLEND);
             Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
             for (int i=0; i < num_trees; i++)
-            {
                 Trees[i].Draw(transID);
-            }
             Gl.glDisable(Gl.GL_BLEND);
+            #endregion
 
-            for(int i=0; i < num_lights; i++)
-            {
+            #region Lights Models
+            for (int i=0; i < num_lights; i++)
                 Lights[i].Draw(transID);
-            }
+            #endregion
 
+            #region Car Model
             car.Draw(transID);
+            #endregion
 
+            #region Phone Model
             phone.Draw(transID);
+            #endregion
 
+            #region Grass Models
             for (int i = 0; i < num_grass; i++)
-            {
                 Grass[i].Draw(transID);
-            }
+            #endregion
 
+            #region Barrels Models
             for (int i = 0; i < num_barrels; i++)
                 Barrels[i].Draw(transID);
+            #endregion
+           
             #endregion
         }
         public void Update(float deltaTime)

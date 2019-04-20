@@ -112,7 +112,7 @@ namespace Graphics
             left.uvCoordinates.Add(new vec2(1, 1));
 
             left.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
-                glm.rotate(90.0f / 180.0f * 3.14f, new vec3(0, 0, 1)),
+                glm.rotate(90.0f / 180.0f * 3.1415f, new vec3(0, 0, 1)),
                 glm.translate(new mat4(1), new vec3(1000, 0, 0)) }
             );
 

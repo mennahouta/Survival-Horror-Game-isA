@@ -67,7 +67,7 @@ namespace Graphics
                 this.Close();
             }
 
-            float speed = 0.6f;
+            float speed = 3f;
             if (e.KeyChar == 'a')
                 renderer.cam.Strafe(-speed);
             if (e.KeyChar == 'd')

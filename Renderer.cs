@@ -45,6 +45,8 @@ namespace Graphics
 
         md2 car;
 
+        Model3D phone;
+
         int num_trees;
         Model3D[] Trees;
 
@@ -67,7 +69,7 @@ namespace Graphics
             Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
-            cam.Reset(20, 50, 150, 30, 400, 300, 0, 1, 0);
+            cam.Reset(20, 40, 150, 30, 400, 300, 0, 1, 0);
 
             ProjectionMatrix = cam.GetProjectionMatrix();
             ViewMatrix = cam.GetViewMatrix();
@@ -85,6 +87,14 @@ namespace Graphics
             Random random = new Random();
             #region 3D Models intialization
 
+            #region Phone Model
+            phone = new Model3D();
+            phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
+            phone.rotmatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+            phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
+            phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 0, 800));
+            #endregion
+
             #region Grass Models
             num_grass = random.Next(50, 70);
             Grass = new Model3D[num_grass];
@@ -92,7 +102,7 @@ namespace Graphics
             {
                 Grass[i] = new Model3D();
                 int rnd = random.Next(1, 3);
-                Grass[i].LoadFile(projectPath + "\\ModelFiles\\grass", 4, "grass0" + (char)(rnd + '0') + ".3ds");
+                Grass[i].LoadFile(projectPath + "\\ModelFiles\\grass", 2, "grass0" + (char)(rnd + '0') + ".3ds");
                 Grass[i].rotmatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
                 Grass[i].scalematrix = glm.scale(new mat4(1), new vec3(5f, 5f, 5f));
                 int x = random.Next(10, 990);
@@ -107,7 +117,7 @@ namespace Graphics
             car.StartAnimation(animType.STAND);
             car.scaleMatrix = glm.scale(new mat4(1), new vec3(0.2f, 0.2f, 0.2f));
             car.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            car.TranslationMatrix = glm.translate(new mat4(1), new vec3(200, 300, 800));
+            car.TranslationMatrix = glm.translate(new mat4(1), new vec3(200, 0, 800));
             float car_radius = 5f;
             vec3 car_pos = new vec3(200, 0, 800);
             #endregion
@@ -118,7 +128,7 @@ namespace Graphics
             for(int i=0; i < num_trees; i++)
             {
                 Trees[i] = new Model3D();
-                Trees[i].LoadFile(projectPath + "\\ModelFiles\\tree", 1, "Tree.obj");
+                Trees[i].LoadFile(projectPath + "\\ModelFiles\\tree", 3, "Tree.obj");
                 Trees[i].scalematrix = glm.scale(new mat4(1), new vec3(13, 30, 10));
                 int x = random.Next(10, 990);
                 int y = 0;
@@ -163,7 +173,7 @@ namespace Graphics
             Barrels = new md2[num_barrels];
             for (int i = 0; i < num_barrels; i++) {
                 Barrels[i] = new md2(projectPath + "\\ModelFiles\\ton\\ton.md2");
-                Barrels[i].scaleMatrix = glm.scale(new mat4(1), new vec3(1, 1, 1));
+                Barrels[i].scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.6f));
                 Barrels[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
                 int x = random.Next(10, 990);
                 int y = 0;
@@ -406,6 +416,8 @@ namespace Graphics
             }
 
             car.Draw(transID);
+
+            phone.Draw(transID);
 
             for (int i = 0; i < num_grass; i++)
             {

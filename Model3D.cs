@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,7 +71,11 @@ namespace Graphics
                 {
                     if (netMaterials[i].HasTextureDiffuse)
                     {
-                        tex = new Texture(RootPath + "\\" + netMaterials[i].TextureDiffuse.FilePath, texUnit, true);
+                        if (netMaterials[i].TextureDiffuse.FilePath[0] == 'X') {
+                            string name = Path.GetFileName(netMaterials[i].TextureDiffuse.FilePath);
+                            tex = new Texture(RootPath + "\\" + name, texUnit, true); }
+                        else
+                            tex = new Texture(RootPath + "\\" + netMaterials[i].TextureDiffuse.FilePath, texUnit, true);
                         textures.Add(i, tex);
                     }
                 }

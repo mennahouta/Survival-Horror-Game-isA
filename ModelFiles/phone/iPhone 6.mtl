@@ -1,12 +1,16 @@
-# Blender MTL File: 'iPhone 6.blend'
-# Material Count: 1
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 28.04.2019 18:49:10
 
-newmtl iPhone_6
-Ns 96.078431
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.097701 0.097701 0.097701
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd texture\iPhone_6_texture.PNG
+newmtl Material__31
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka iPhone_6_texture.PNG
+	map_Kd iPhone_6_texture.PNG

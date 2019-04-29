@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="FreeImage.cs" />
     <Compile Include="GPU.cs" />
     <Compile Include="GraphicsForm.cs">
       <SubType>Form</SubType>
@@ -85,6 +86,7 @@
     <Compile Include="GraphicsForm.Designer.cs">
       <DependentUpon>GraphicsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Ground.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="md2.cs" />
     <Compile Include="Model.cs" />

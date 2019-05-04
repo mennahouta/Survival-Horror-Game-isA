@@ -13,25 +13,31 @@ namespace Graphics
     {
         Model up, down, right, left, back, front;
         Texture texUp, texDown, texRight, texLeft, texBack, texFront;
-        public Skybox() {
+        public float maxX, maxY, maxZ;
+
+        public Skybox(float maxX, float maxY, float maxZ, List<String>TEX) {
+            this.maxX = maxX;
+            this.maxY = maxY;
+            this.maxZ = maxZ;
+
             #region Skybox Textures
-            texUp = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_up.jpg", 0);
-            texDown = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_dn.jpg", 0);
-            texRight = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_rt.jpg", 0);
-            texLeft = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_lf.jpg", 0);
-            texBack = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_bk.jpg", 0);
-            texFront = new Texture(Renderer.projectPath + "\\Textures\\grimmnight_ft.jpg", 0);
+            texUp    = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[0], 0);
+            texDown  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[1], 0);
+            texRight = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[2], 0);
+            texLeft  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[3], 0);
+            texBack  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[4], 0);
+            texFront = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[5], 0);
             #endregion
 
             #region Skybox Faces
             #region Down Face
             down = new Model();
             vec3 v1 = new vec3(0, 0, 0);
-            vec3 v2 = new vec3(1000, 0, 1000);
-            vec3 v3 = new vec3(1000, 0, 0);
+            vec3 v2 = new vec3(maxX, 0, maxZ);
+            vec3 v3 = new vec3(maxX, 0, 0);
             vec3 v4 = new vec3(0, 0, 0);
-            vec3 v5 = new vec3(1000, 0, 1000);
-            vec3 v6 = new vec3(0, 0, 1000);
+            vec3 v5 = new vec3(maxX, 0, maxZ);
+            vec3 v6 = new vec3(0, 0, maxZ);
             down.vertices.Add(v1);
             down.vertices.Add(v2);
             down.vertices.Add(v3);
@@ -67,7 +73,7 @@ namespace Graphics
             up.uvCoordinates.Add(new vec2(0, 0));
             up.uvCoordinates.Add(new vec2(0, 1));
 
-            up.transformationMatrix = glm.translate(new mat4(1), new vec3(0, 1000, 0));
+            up.transformationMatrix = glm.translate(new mat4(1), new vec3(0, maxY, 0));
 
             up.Initialize();
             #endregion
@@ -89,7 +95,7 @@ namespace Graphics
             right.uvCoordinates.Add(new vec2(0, 0));
             right.uvCoordinates.Add(new vec2(0, 1));
 
-            right.transformationMatrix = glm.rotate(90.0f / 180.0f * 3.1415f, new vec3(0, 0, 1));
+            right.transformationMatrix = glm.rotate(90.0f / 180.0f * 3.141592f, new vec3(0, 0, 1));
 
             right.Initialize();
             #endregion
@@ -112,8 +118,8 @@ namespace Graphics
             left.uvCoordinates.Add(new vec2(1, 1));
 
             left.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
-                glm.rotate(90.0f / 180.0f * 3.1415f, new vec3(0, 0, 1)),
-                glm.translate(new mat4(1), new vec3(1000, 0, 0)) }
+                glm.rotate(90.0f / 180.0f * 3.141592f, new vec3(0, 0, 1)),
+                glm.translate(new mat4(1), new vec3(maxZ, 0, 0)) }
             );
 
             left.Initialize();
@@ -121,12 +127,12 @@ namespace Graphics
 
             #region Back face
             back = new Model();
-            v1 = new vec3(0, 0, 1000);
-            v2 = new vec3(1000, 1000, 1000);
-            v3 = new vec3(1000, 0, 1000);
-            v4 = new vec3(0, 0, 1000);
-            v5 = new vec3(1000, 1000, 1000);
-            v6 = new vec3(0, 1000, 1000);
+            v1 = new vec3(0, 0, maxZ);
+            v2 = new vec3(maxX, maxY, maxZ);
+            v3 = new vec3(maxX, 0, maxZ);
+            v4 = new vec3(0, 0, maxZ);
+            v5 = new vec3(maxX, maxY, maxZ);
+            v6 = new vec3(0, maxY, maxZ);
             back.vertices.Add(v1);
             back.vertices.Add(v2);
             back.vertices.Add(v3);
@@ -162,7 +168,7 @@ namespace Graphics
             front.uvCoordinates.Add(new vec2(1, 0));
             front.uvCoordinates.Add(new vec2(0, 0));
 
-            front.transformationMatrix = glm.translate(new mat4(1), new vec3(0, 0, -1000.0f));
+            front.transformationMatrix = glm.translate(new mat4(1), new vec3(0, 0, -maxZ));
 
             front.Initialize();
             #endregion

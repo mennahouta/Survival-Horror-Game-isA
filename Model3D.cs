@@ -21,7 +21,7 @@ namespace Graphics
         List<Animation> netAnimation;
         List<Material> netMaterials;
         List<EmbeddedTexture> netTextures;
-        List<Model> meshes;
+        public List<Model> meshes;
         Texture tex;
         public mat4 scalematrix;
         public mat4 transmatrix;

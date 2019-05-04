@@ -12,11 +12,12 @@ namespace Graphics
         float mAngleX = 0;
         float mAngleY = 0;
         vec3 mDirection;
-        vec3 mPosition;
+        public vec3 mPosition;
         vec3 mRight;
         vec3 mUp;
         mat4 mViewMatrix;
         mat4 mProjectionMatrix;
+        float PersonHeight;
         public Camera()
         {
             Reset(0, 0, 5, 0, 0, 0, 0, 1, 0);
@@ -56,6 +57,8 @@ namespace Graphics
             mDirection = glm.normalize(mDirection);
 
             mViewMatrix = glm.lookAt(mPosition, centerPos, mUp);
+
+            PersonHeight = eyeY;
         }
 
         public void UpdateViewMatrix()
@@ -99,7 +102,9 @@ namespace Graphics
 
             result *= dist;
             result += mPosition;
-            return (result.z >= 3 && result.z <= 997 && result.x >= 3 && result.x <= 997 && result.y >= 3 && result.y <= 997);
+            return (result.x >= 3 && result.x <= Renderer.skyboxes[Renderer.currentSkyboxID].maxX &&
+                    result.y >= 3 && result.y <= Renderer.skyboxes[Renderer.currentSkyboxID].maxY &&
+                    result.z >= 3 && result.z <= Renderer.skyboxes[Renderer.currentSkyboxID].maxZ);
         }
 
 
@@ -108,18 +113,21 @@ namespace Graphics
             if (!checkPos(dist, 0))
                 return;
             mPosition += dist * mDirection;
+            mPosition.y = PersonHeight;
         }
         public void Strafe(float dist)
         {
             if (!checkPos(dist, 1))
                 return;
             mPosition += dist * mRight;
+            mPosition.y = PersonHeight;
         }
         public void Fly(float dist)
         {
             if (!checkPos(dist, 2))
                 return;
             mPosition += dist * mUp;
+            mPosition.y = PersonHeight;
         }
     }
 }

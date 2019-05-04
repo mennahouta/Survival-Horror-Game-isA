@@ -3,6 +3,8 @@ using System.Threading;
 using System.Drawing;
 using System.Diagnostics;
 using System;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Graphics
 {
@@ -11,6 +13,8 @@ namespace Graphics
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
 
+		//Menna
+		
         float deltaTime;
         public GraphicsForm()
         {
@@ -23,23 +27,27 @@ namespace Graphics
             simpleOpenGlControl1.InitializeContexts();
 
             MoveCursor();
-            
 
             initialize();
             deltaTime = 0.005f;
             #region Threads
+            Thread.CurrentThread.Name = "Main";
+
             MainLoopThread = new Thread(MainLoop);
+            MainLoopThread.Name = "MainLoop Thread";
             MainLoopThread.Start();
             #endregion
         }
         void initialize()
         {
+			//Esraa
             renderer.Initialize();   
         }
         void MainLoop()
         {
             while (true)
             {
+                renderer.Flush_Existing_IOBJ();
                 renderer.Draw();
                 renderer.Update(deltaTime);
                 simpleOpenGlControl1.Refresh();
@@ -69,18 +77,26 @@ namespace Graphics
 
             float speed = 3f;
             if (e.KeyChar == 'a')
-                renderer.cam.Strafe(-speed);
+                Renderer.cam.Strafe(-speed);
             if (e.KeyChar == 'd')
-                renderer.cam.Strafe(speed);
+                Renderer.cam.Strafe(speed);
             if (e.KeyChar == 's')
-                renderer.cam.Walk(-speed);
+                Renderer.cam.Walk(-speed);
             if (e.KeyChar == 'w')
-                renderer.cam.Walk(speed);
+                Renderer.cam.Walk(speed);
             if (e.KeyChar == 'z')
-                renderer.cam.Fly(-speed);
+                Renderer.cam.Fly(-speed);
             if (e.KeyChar == 'c')
-                renderer.cam.Fly(speed);
-            
+                Renderer.cam.Fly(speed);
+            if (e.KeyChar == 'e')
+            {
+                modelType currentInteractionType = renderer.InteractiveCheck();
+                
+                #region Garbage interaction
+				//Menna
+                #endregion
+            }
+
         }
 
         float prevX, prevY;
@@ -89,16 +105,16 @@ namespace Graphics
             float speed = 0.05f;
             float delta = e.X - prevX;
             if (delta > 2)
-                renderer.cam.Yaw(-speed);
+                Renderer.cam.Yaw(-speed);
             else if (delta < -2)
-                renderer.cam.Yaw(speed);
+                Renderer.cam.Yaw(speed);
 
 
             delta = e.Y - prevY;
             if (delta > 2)
-                renderer.cam.Pitch(-speed);
+                Renderer.cam.Pitch(-speed);
             else if (delta < -2)
-                renderer.cam.Pitch(speed);
+                Renderer.cam.Pitch(speed);
 
             MoveCursor();
         }

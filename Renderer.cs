@@ -7,9 +7,22 @@ using System.Threading.Tasks;
 using Tao.OpenGl;
 using GlmNet;
 using System.IO;
+using System.Threading;
 
 namespace Graphics
 {
+    enum skyboxType
+    {
+        FOREST,
+        LIVING,
+        BEDROOM,
+        KITCHEN,
+        BATHROOM,
+        CLOSET,
+        BASEMENT,
+        MAX_SKYBOXES
+    }
+
     class Renderer
     {
         public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
@@ -25,45 +38,39 @@ namespace Graphics
 
         int EyePositionID,  AmbientLightID, DataID;
 
-        public Camera cam;
-        
+        static public Camera cam;
+
         public float Speed = 1;
 
-        #region Skyboxes declaration
-        Skybox skybox;
-        #endregion
+        Ground g_down;
 
+        List<Boolean> PrevoiuslyLoaded;
         #region 3D Models declaration
+        Model3D car,  phone, watchtower, house_obj, kitchen;
+        List<Model3D> bedroomFurni;
+        List<Model3D> livingFurni;
 
-        #region md2 models
-        /*
-        md2 bag, bank1, barrel_plastic, BENCH, box, CHAIR, CHAIR1, chair2, chair3, CLOSET;
-        md2 coffeemaker, comptable, container_closed, container_opened, curtain, curtain_long;
-        md2 curtains, deerhead, desk, desklamp, fireplace, flowerpot2, HANDDRYER, KAST1, LAMP, lantern;
-        md2 LIGHT2, LIGHT3, LIGHT5, LIGHT6, locker2, pellet, SOAP, SODAMACHINE, stleer, TABLE, TL, TOILET;
-        md2 TPAPER, WATERDISP, wc, workbench, BED, SINK;
-        */
-        #endregion
+        public static List<InteractiveModel> doors;
+        public static List<Skybox> skyboxes;
+        public static int currentSkyboxID = 0; //FORREST
 
-        #region Car Model
-        md2 car;
-        #endregion
-
-        #region Phone Model
-        Model3D phone;
-        #endregion
+		//Esraa
+		
+		//Menna
+		
+        int texUnit_counter = 0;
 
         #region Trees Models
         int num_trees, 
-            rnd_trees_L = 50, 
-            rnd_trees_H = 100;
+            rnd_trees_L = /*5*/0, 
+            rnd_trees_H = /*10*/0;
         Model3D[] Trees;
         #endregion
 
         #region Lights Models
         int num_lights, 
-            rnd_lights_L = 20, 
-            rnd_lights_H = 50;
+            rnd_lights_L = /*2*/0, 
+            rnd_lights_H = /*5*/0;
         md2[] Lights;
         #endregion
 
@@ -76,8 +83,8 @@ namespace Graphics
 
         #region Barrels Models
         int num_barrels, 
-            rnd_barrels_L = 10, 
-            rnd_barrels_H = 15;
+            rnd_barrels_L = /*1*/0, 
+            rnd_barrels_H = /*1*/5;
         md2[] Barrels;
         #endregion
 
@@ -92,7 +99,7 @@ namespace Graphics
             Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
-            cam.Reset(180, 20, 800, 20, 20, 150, 0, 1, 0);
+            cam.Reset(180, 30, 800, 20, 20, 150, 0, 1, 0);
 
             #region Matricies intialization
             ProjectionMatrix = cam.GetProjectionMatrix();
@@ -107,17 +114,177 @@ namespace Graphics
 
             sh.UseShader();
 
-            skybox = new Skybox();
-          
+            g_down = new Ground(2100, 2100, 2, 2);
+
+
+            #region Skyboxes intialization
+        
+            #region Initialize All Load of Skyboxes to False
+            PrevoiuslyLoaded = new List<Boolean>();
+            for (int i = 0; i < (int)skyboxType.MAX_SKYBOXES; i++)
+                PrevoiuslyLoaded.Add(false);
+            #endregion
+
+            List<List<String>> skyboxes_textures = new List<List<String>>()
+            {
+                //texUp, texDown, texRight, texLeft, texBack, texFront
+                new List<string>()
+                {
+                    "grimmnight_up.jpg", "grimmnight_dn.jpg", "grimmnight_rt.jpg", "grimmnight_lf.jpg", "grimmnight_bk.jpg", "grimmnight_ft.jpg"
+                }, //0: Forest skybox
+                new List<string>()
+                {
+                    "room.jpg", "room_bt.jpg", "room.jpg", "room.jpg", "room.jpg", "room.jpg"
+                }, //1: LivingRoom skybox
+                new List<string>()
+                {
+                    "room.jpg", "room_bt.jpg", "room.jpg", "room.jpg", "room.jpg", "room.jpg"
+                }, //2: Bedroom skybox
+                new List<string>()
+                {
+                    "room.jpg", "kit_dn.jpg", "room.jpg", "room.jpg", "room.jpg", "room.jpg"
+                }, //3: Kitchen skybox
+                new List<string>()
+                {
+                    "room.jpg", "bath3.jpg", "bath3.jpg", "bath3.jpg", "bath3.jpg", "bath3.jpg"
+                }, //4: Bathroom skybox
+                new List<string>()
+                {
+                    "room.jpg", "closet_floor.jpg", "room.jpg", "room.jpg", "room.jpg", "room.jpg"
+                }, //5: Closet skybox (has a trapdoor)
+                new List<string>()
+                {
+                    "room.jpg", "room.jpg", "room.jpg", "room.jpg", "room.jpg", "room.jpg"
+                }, //6: Basement skybox
+            };
+            skyboxes = new List<Skybox>()
+            {
+                new Skybox(1000, 1000, 1000, skyboxes_textures[(int) skyboxType.FOREST]),   //0: Forest skybox
+                new Skybox(300, 300, 300, skyboxes_textures[(int) skyboxType.LIVING]),      //1: LivingRoom skybox
+                new Skybox(300, 300, 300, skyboxes_textures[(int) skyboxType.BEDROOM]),     //2: Bedroom skybox
+                new Skybox(300, 300, 300, skyboxes_textures[(int) skyboxType.KITCHEN]),     //3: Kitchen skybox
+                new Skybox(300, 300, 300, skyboxes_textures[(int) skyboxType.BATHROOM]),     //4: Bathroom skybox
+                new Skybox(200, 200, 200, skyboxes_textures[(int) skyboxType.CLOSET]),      //5: Closet skybox (has a trapdoor)
+                new Skybox(300, 300, 300, skyboxes_textures[(int) skyboxType.BASEMENT]),    //6: Basement skybox
+            };
+            #endregion
+
+            #region Doors initialization
+            doors = new List<InteractiveModel>()
+            {
+                new InteractiveModel("door", "door", texUnit_counter%32, 15, modelType.DOOR, 0),        //0: Front door, from 0 <-> 1
+                new InteractiveModel("door", "door_in", texUnit_counter%32, 5, modelType.DOOR, 1),     //1: livingBED, from 1<->2
+                new InteractiveModel("door", "door_in", texUnit_counter%32, 5, modelType.DOOR, 2),     //2: livingKIT, from 1<->3
+                new InteractiveModel("door", "door_in", texUnit_counter%32, 5, modelType.DOOR, 3),     //3: bathR, from 2<->4
+                new InteractiveModel("door", "door_in", texUnit_counter%32, 5, modelType.DOOR, 4),     //4: closet, from 2<->5
+                new InteractiveModel("door", "door_in", texUnit_counter%32, 5, modelType.DOOR, 5),     //5: trapDr, from 5 ->6 (game over)
+            };
+            texUnit_counter++;
+
+            #region Transformations
+            doors[0].Scale(.5f, .5f, .5f);
+            for (int i = 1; i < doors.Count; i++)
+                doors[i].Scale(1f, 1.3f, 1f);
+            doors[0].Translate(700, 0, 500);
+            doors[1].Rotate(-90, new vec3(0, 1, 0));
+            doors[1].Translate(300, 0, 245);
+            doors[2].Translate(80, 0, 0);
+            doors[3].Translate(80, 0, 0);
+            doors[4].Translate(270, 0, 300);
+            #endregion
+            #endregion
+
             Random random = new Random();
             #region 3D Models intialization
+            #region Bedroom Furni
+            bedroomFurni = new List<Model3D>()
+            {
+                new Model3D(), //Bed
+                new Model3D(), //Side1
+                new Model3D(), //Side2
+                new Model3D(), //Closet
+                new Model3D(), //Chair
+            };
+            #region LoadFile
+            bedroomFurni[0].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "bed.obj");
+            texUnit_counter++;
+            bedroomFurni[1].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "side1.obj");
+            texUnit_counter++;
+            bedroomFurni[2].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "side2.obj");
+            texUnit_counter++;
+            bedroomFurni[3].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "closet.obj");
+            texUnit_counter++;
+            bedroomFurni[4].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "chair.obj");
+            texUnit_counter++;
+            #endregion
+            #region Transformations
+            for (int i = 0; i < bedroomFurni.Count; i++)
+            {
+                bedroomFurni[i].scalematrix = glm.scale(new mat4(1), new vec3(.3f, .3f, .3f));
+                bedroomFurni[i].rotmatrix = glm.rotate(-90.0f / 180 * 3.141592f, new vec3(0, 1, 0));
+            }
+            for (int i = 0; i < 3; i++)
+                bedroomFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(245, 0, 150));
+            bedroomFurni[3].transmatrix = glm.translate(new mat4(1), new vec3(10, 0, 150));
+            bedroomFurni[4].transmatrix = glm.translate(new mat4(1), new vec3(110, 0, 250));
+            #endregion
+            #endregion
+
+            #region LIVING ROOM
+            livingFurni = new List<Model3D>();
+            for (int i = 0; i < 7; i++)
+                livingFurni.Add(new Model3D());
+            #region LoadFile
+            livingFurni[0].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "sofa3.obj");
+            texUnit_counter++;
+            livingFurni[1].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "rug.obj");
+            texUnit_counter++;
+            livingFurni[2].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "oldtv.obj");
+            texUnit_counter++;
+            livingFurni[3].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "table2.obj");
+            texUnit_counter++;
+            livingFurni[4].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "plant.obj");
+            texUnit_counter++;
+            livingFurni[5].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "floor_lamp.obj");
+            texUnit_counter++;
+            livingFurni[6].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "decoSet.obj");
+            texUnit_counter++;
+            #endregion
+            #region Transformations
+            for (int i = 0; i < 5; i++)
+                livingFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(210, 1, 107));
+            livingFurni[5].transmatrix = glm.translate(new mat4(1), new vec3(180, 0, 15));
+            livingFurni[6].transmatrix = glm.translate(new mat4(1), new vec3(15, 0, 150));
+            #endregion
+            #endregion
+
+            #region Kitchen
+            kitchen = new Model3D();
+            kitchen.LoadFile(projectPath + "\\ModelFiles\\kitchen", texUnit_counter % 32, "kitSet.obj");
+            texUnit_counter++;
+            kitchen.scalematrix = glm.scale(new mat4(1), new vec3(7, 7, 7));
+            kitchen.transmatrix = glm.translate(new mat4(1), new vec3(235, 0, 10));
+            #endregion
+
+            #region watchower
+            watchtower = new Model3D();
+            watchtower.LoadFile(projectPath + "\\ModelFiles\\watchtower", 0, "wooden watch tower.obj");
+            watchtower.scalematrix = glm.scale(new mat4(1), new vec3(20, 30, 20));
+            watchtower.transmatrix = glm.translate(new mat4(1), new vec3(400, 0, 400));
+            #endregion
+
+            #region house
+            house_obj = new Model3D();
+            house_obj.LoadFile(projectPath + "\\ModelFiles\\house_obj", 7, "house-low-rus-obj.obj");
+            house_obj.scalematrix = glm.scale(new mat4(1), new vec3(.5f, .5f, .5f));
+            house_obj.transmatrix = glm.translate(new mat4(1), new vec3(700, 0, 500));
+            #endregion
 
             #region Phone Model
             phone = new Model3D();
             phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
-            phone.rotmatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
             phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
-            phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 0, 800));
+            phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 2, 800));
             #endregion
 
             #region Grass Models
@@ -138,19 +305,16 @@ namespace Graphics
             #endregion
 
             #region Car Model
-            car = new md2(projectPath + "\\ModelFiles\\car\\car.md2");
-            car.StartAnimation(animType.STAND);
-            car.scaleMatrix = glm.scale(new mat4(1), new vec3(0.2f, 0.2f, 0.2f));
-            car.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            car.TranslationMatrix = glm.translate(new mat4(1), new vec3(200, 0, 800));
-            float car_radius = 5f;
-            vec3 car_pos = new vec3(200, 0, 800);
+            car = new Model3D();
+            car.LoadFile(projectPath + "\\ModelFiles\\car", texUnit_counter % 32, "delorean.obj");
+            texUnit_counter++;
+            car.transmatrix = glm.translate(new mat4(1), new vec3(200, 0, 800));
             #endregion
 
             #region Trees Models
             num_trees = random.Next(rnd_trees_L, rnd_trees_H);
             Trees = new Model3D[num_trees];
-            for(int i=0; i < num_trees; i++)
+            for (int i = 0; i < num_trees; i++)
             {
                 Trees[i] = new Model3D();
                 Trees[i].LoadFile(projectPath + "\\ModelFiles\\tree", 3, "Tree.obj");
@@ -159,15 +323,12 @@ namespace Graphics
                 int y = 0;
                 int z = random.Next(10, 990);
                 vec3 pos = new vec3(x, y, z);
-
-                float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
-                if(dist <= car_radius)
-                {
-                    x -= (int)(2 * car_radius);
-                    z -= (int)(2 * car_radius);
-                }
                 Trees[i].transmatrix = glm.translate(new mat4(1), new vec3(x, y, z));
             }
+            #endregion
+
+            #region Garbages initialization
+			//Menna
             #endregion
 
             #region Lights Models
@@ -182,22 +343,15 @@ namespace Graphics
                 int y = 0;
                 int z = random.Next(10, 990);
                 vec3 pos = new vec3(x, y, z);
-
-                float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
-                if (dist <= car_radius)
-                {
-                    x -= (int)(2 * car_radius);
-                    z -= (int)(2 * car_radius);
-                }
                 Lights[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
             }
-
             #endregion
 
             #region Barrels Models
             num_barrels = random.Next(rnd_barrels_L, rnd_barrels_H);
             Barrels = new md2[num_barrels];
-            for (int i = 0; i < num_barrels; i++) {
+            for (int i = 0; i < num_barrels; i++)
+            {
                 Barrels[i] = new md2(projectPath + "\\ModelFiles\\ton\\ton.md2");
                 Barrels[i].scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.6f));
                 Barrels[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
@@ -205,186 +359,13 @@ namespace Graphics
                 int y = 0;
                 int z = random.Next(10, 990);
                 vec3 pos = new vec3(x, y, z);
-
-                float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
-                if (dist <= car_radius) {
-                    x -= (int)(2 * car_radius);
-                    z -= (int)(2 * car_radius);
-                }
                 Barrels[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
             }
             #endregion
 
-            #region Other
-            #region Not working md2 models
-            /*
-            bag = new md2(projectPath + "\\ModelFiles\\bag.md2");
-            bank1 = new md2(projectPath + "\\ModelFiles\\bank1.md2");
-            barrel_plastic = new md2(projectPath + "\\ModelFiles\\barrel_plastic.md2");
-            box = new md2(projectPath + "\\ModelFiles\\box.md2");
-            chair2 = new md2(projectPath + "\\ModelFiles\\chair2.md2");
-            chair3 = new md2(projectPath + "\\ModelFiles\\chair3.md2");
-            coffeemaker = new md2(projectPath + "\\ModelFiles\\coffeemaker.md2");
-            comptable = new md2(projectPath + "\\ModelFiles\\comptable.md2");
-            container_closed = new md2(projectPath + "\\ModelFiles\\container_closed.md2");
-            container_opened = new md2(projectPath + "\\ModelFiles\\container_opened.md2");
-            curtain = new md2(projectPath + "\\ModelFiles\\curtain.md2");
-            curtain_long = new md2(projectPath + "\\ModelFiles\\curtain_long.md2");
-            curtains = new md2(projectPath + "\\ModelFiles\\curtains.md2");
-            deerhead = new md2(projectPath + "\\ModelFiles\\deerhead.md2");
-            desk = new md2(projectPath + "\\ModelFiles\\desk.md2");
-            desklamp = new md2(projectPath + "\\ModelFiles\\desklamp.md2");
-            fireplace = new md2(projectPath + "\\ModelFiles\\fireplace.md2");
-            flowerpot2 = new md2(projectPath + "\\ModelFiles\\flowerpot2.md2");
-            lantern = new md2(projectPath + "\\ModelFiles\\lantern.md2");
-            locker2 = new md2(projectPath + "\\ModelFiles\\locker2.md2");
-            pellet = new md2(projectPath + "\\ModelFiles\\pellet.md2");
-            stleer = new md2(projectPath + "\\ModelFiles\\stleer.md2");
-            wc = new md2(projectPath + "\\ModelFiles\\wc.md2");
-            workbench = new md2(projectPath + "\\ModelFiles\\workbench.md2");       
-            
-            bag.StartAnimation(animType.STAND);
-            bank1.StartAnimation(animType.STAND);
-            barrel_plastic.StartAnimation(animType.STAND);
-            box.StartAnimation(animType.STAND);
-            chair2.StartAnimation(animType.STAND);
-            chair3.StartAnimation(animType.STAND);
-            coffeemaker.StartAnimation(animType.STAND);
-            comptable.StartAnimation(animType.STAND);
-            container_closed.StartAnimation(animType.STAND);
-            container_opened.StartAnimation(animType.STAND);
-            curtain.StartAnimation(animType.STAND);
-            curtain_long.StartAnimation(animType.STAND);
-            curtains.StartAnimation(animType.STAND);
-            deerhead.StartAnimation(animType.STAND);
-            desk.StartAnimation(animType.STAND);
-            desklamp.StartAnimation(animType.STAND);
-            fireplace.StartAnimation(animType.STAND);
-            lantern.StartAnimation(animType.STAND);
-            flowerpot2.StartAnimation(animType.STAND);
-            locker2.StartAnimation(animType.STAND);
-            pellet.StartAnimation(animType.STAND);
-            stleer.StartAnimation(animType.STAND);
-            wc.StartAnimation(animType.STAND);
-            workbench.StartAnimation(animType.STAND);
-             * */
-            #endregion
-
-            #region Open File
-            /*
-            SINK = new md2(projectPath + "\\ModelFiles\\SINK.md2");
-            BED = new md2(projectPath + "\\ModelFiles\\BED.md2");
-            BENCH = new md2(projectPath + "\\ModelFiles\\BENCH.md2");
-            CHAIR = new md2(projectPath + "\\ModelFiles\\CHAIR.md2");
-            CHAIR1 = new md2(projectPath + "\\ModelFiles\\CHAIR1.md2");
-            CLOSET = new md2(projectPath + "\\ModelFiles\\CLOSET.md2");
-            HANDDRYER = new md2(projectPath + "\\ModelFiles\\HANDDRYER.md2");
-            KAST1 = new md2(projectPath + "\\ModelFiles\\KAST1.md2");
-            LAMP = new md2(projectPath + "\\ModelFiles\\LAMP.md2");
-            LIGHT2 = new md2(projectPath + "\\ModelFiles\\LIGHT2.md2");
-            LIGHT3 = new md2(projectPath + "\\ModelFiles\\LIGHT3.md2");
-            LIGHT5 = new md2(projectPath + "\\ModelFiles\\LIGHT5.md2");
-            LIGHT6 = new md2(projectPath + "\\ModelFiles\\LIGHT6.md2");
-            SOAP = new md2(projectPath + "\\ModelFiles\\SOAP.md2");
-            SODAMACHINE = new md2(projectPath + "\\ModelFiles\\SODAMACHINE.md2");
-            TABLE = new md2(projectPath + "\\ModelFiles\\TABLE.md2");
-            TL = new md2(projectPath + "\\ModelFiles\\TL.md2");
-            TOILET = new md2(projectPath + "\\ModelFiles\\TOILET.md2");
-            TPAPER = new md2(projectPath + "\\ModelFiles\\TPAPER.md2");
-            WATERDISP = new md2(projectPath + "\\ModelFiles\\WATERDISP.md2");
-            */
-            #endregion
-
-            #region StartAnimation
-            /*
-            SINK.StartAnimation(animType.STAND);
-            BED.StartAnimation(animType.STAND);
-            BENCH.StartAnimation(animType.STAND);
-            CHAIR.StartAnimation(animType.STAND);
-            CHAIR1.StartAnimation(animType.STAND);
-            CLOSET.StartAnimation(animType.STAND);
-            HANDDRYER.StartAnimation(animType.STAND);
-            KAST1.StartAnimation(animType.STAND);
-            LAMP.StartAnimation(animType.STAND);
-            LIGHT2.StartAnimation(animType.STAND);
-            LIGHT3.StartAnimation(animType.STAND);
-            LIGHT5.StartAnimation(animType.STAND);
-            LIGHT6.StartAnimation(animType.STAND);
-            SOAP.StartAnimation(animType.STAND);
-            SODAMACHINE.StartAnimation(animType.STAND);
-            TABLE.StartAnimation(animType.STAND);
-            TL.StartAnimation(animType.STAND);
-            TOILET.StartAnimation(animType.STAND);
-            TPAPER.StartAnimation(animType.STAND);
-            WATERDISP.StartAnimation(animType.STAND);
-            */
-            #endregion
-
-            #region Transformation
-            /*
-            BED.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            BED.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-
-            SINK.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            SINK.TranslationMatrix = glm.translate(new mat4(1), new vec3(40, -1, 10));
-
-            BENCH.scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.3f));
-            BENCH.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            BENCH.TranslationMatrix = glm.translate(new mat4(1), new vec3(20, -1, 20));
-
-            CHAIR.scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.3f));
-            CHAIR.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 1, 0));
-            CHAIR.TranslationMatrix = glm.translate(new mat4(1), new vec3(-10, -1, -10));
-
-            CHAIR1.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            CHAIR1.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            CLOSET.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            CLOSET.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            HANDDRYER.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            HANDDRYER.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            KAST1.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            KAST1.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            LAMP.scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 1f));
-            LAMP.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            LIGHT2.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            //LIGHT2.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            LIGHT3.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            //LIGHT3.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            LIGHT5.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            //LIGHT5.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            LIGHT6.scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.7f));
-            LIGHT6.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            SOAP.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            SOAP.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            SODAMACHINE.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            SODAMACHINE.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            TABLE.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            TABLE.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            TL.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            TL.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            TOILET.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            TOILET.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            TPAPER.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            TPAPER.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-
-            WATERDISP.scaleMatrix = glm.scale(new mat4(1), new vec3(0.1f, 0.1f, 0.1f));
-            WATERDISP.rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-            */
-            #endregion
+            #region Radio Model
+			//esraa
+            //radio.Translate(15, 30, 150);
             #endregion
 
             #endregion
@@ -393,73 +374,359 @@ namespace Graphics
             Gl.glDepthFunc(Gl.GL_LESS);
         }
 
+
+        //Not working
+        //dunno what to do :)
+        #region NOOOT WORKINGG!!
+        public void LoadSkyboxModels()
+        {
+
+            skyboxType SKYBOX = (skyboxType)currentSkyboxID;
+            if (PrevoiuslyLoaded[(int)SKYBOX])
+                return;
+            if (Thread.CurrentThread.Name == "Main")
+            {
+                Thread.Sleep(10000);
+                return;
+            }
+            Random random = new Random();
+            switch (SKYBOX)
+            {
+                #region FOREST
+                case skyboxType.FOREST:
+                    #region Garbages initialization
+                    garbages = new List<InteractiveModel>();
+                    numOfGarbages = random.Next(2, 7);
+                    bool garbageBag = true;
+                    for (int i = 0; i < numOfGarbages; i++)
+                    {
+                        //if (garbageBag)
+                        garbages.Add(new InteractiveModel("garbage_bag", "garbage_bag", texUnit_counter % 32, 7, modelType.GARBAGE, i));
+                        //else
+                        //garbages.Add(new InteractiveModel("scattered_garbage", "scattered_garbage", (texUnit_counter + 1) % 32, 7, modelType.GARBAGE, i));
+
+                        int x = random.Next(0, (int)skyboxes[0].maxX);
+                        int y = 0;
+                        int z = random.Next(0, (int)skyboxes[0].maxZ);
+                        vec3 pos = new vec3(x, y, z);
+                        garbages[i].Scale(.6f, .6f, .6f);
+                        garbages[i].Translate(x, y, z);
+
+                        //garbageBag = !garbageBag;
+                    }
+                    texUnit_counter += 1;
+                    key_garbageID = random.Next(0, numOfGarbages);
+                    #endregion
+
+                    #region Car Model
+                    car = new Model3D();
+                    car.LoadFile(projectPath + "\\ModelFiles\\car", texUnit_counter % 32, "delorean.obj");
+                    texUnit_counter++;
+                    car.transmatrix = glm.translate(new mat4(1), new vec3(200, 0, 800));
+                    #endregion
+
+                    #region watchower
+                    watchtower = new Model3D();
+                    watchtower.LoadFile(projectPath + "\\ModelFiles\\watchtower", 0, "wooden watch tower.obj");
+                    watchtower.scalematrix = glm.scale(new mat4(1), new vec3(20, 30, 20));
+                    watchtower.transmatrix = glm.translate(new mat4(1), new vec3(400, 0, 400));
+                    #endregion
+
+                    #region house
+                    house_obj = new Model3D();
+                    house_obj.LoadFile(projectPath + "\\ModelFiles\\house_obj", 7, "house-low-rus-obj.obj");
+                    house_obj.scalematrix = glm.scale(new mat4(1), new vec3(.5f, .5f, .5f));
+                    house_obj.transmatrix = glm.translate(new mat4(1), new vec3(700, 0, 500));
+                    #endregion
+
+                    #region Phone Model
+                    phone = new Model3D();
+                    phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
+                    phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
+                    phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 2, 800));
+                    #endregion
+
+                    #region Grass Models
+                    num_grass = random.Next(rnd_grass_L, rnd_grass_H);
+                    Grass = new Model3D[num_grass];
+                    for (int i = 0; i < num_grass; i++)
+                    {
+                        Grass[i] = new Model3D();
+                        int rnd = random.Next(1, 3);
+                        Grass[i].LoadFile(projectPath + "\\ModelFiles\\grass", 2, "grass0" + (char)(rnd + '0') + ".3ds");
+                        Grass[i].rotmatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+                        Grass[i].scalematrix = glm.scale(new mat4(1), new vec3(5f, 5f, 5f));
+                        int x = random.Next(10, 990);
+                        int y = 0;
+                        int z = random.Next(10, 990);
+                        Grass[i].transmatrix = glm.translate(new mat4(1), new vec3(x, y, z));
+                    }
+                    #endregion
+
+                    #region Trees Models
+                    num_trees = random.Next(rnd_trees_L, rnd_trees_H);
+                    Trees = new Model3D[num_trees];
+                    for (int i = 0; i < num_trees; i++)
+                    {
+                        Trees[i] = new Model3D();
+                        Trees[i].LoadFile(projectPath + "\\ModelFiles\\tree", 3, "Tree.obj");
+                        Trees[i].scalematrix = glm.scale(new mat4(1), new vec3(13, 30, 10));
+                        int x = random.Next(10, 990);
+                        int y = 0;
+                        int z = random.Next(10, 990);
+                        vec3 pos = new vec3(x, y, z);
+                        Trees[i].transmatrix = glm.translate(new mat4(1), new vec3(x, y, z));
+                    }
+                    #endregion
+
+                    #region Lights Models
+                    num_lights = random.Next(rnd_lights_L, rnd_lights_H);
+                    Lights = new md2[num_lights];
+                    for (int i = 0; i < num_lights; i++)
+                    {
+                        Lights[i] = new md2(projectPath + "\\ModelFiles\\LIGHT6.md2");
+                        Lights[i].scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.3f));
+                        Lights[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+                        int x = random.Next(10, 990);
+                        int y = 0;
+                        int z = random.Next(10, 990);
+                        vec3 pos = new vec3(x, y, z);
+                        Lights[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
+                    }
+
+                    #endregion
+
+                    #region Barrels Models
+                    num_barrels = random.Next(rnd_barrels_L, rnd_barrels_H);
+                    Barrels = new md2[num_barrels];
+                    for (int i = 0; i < num_barrels; i++)
+                    {
+                        Barrels[i] = new md2(projectPath + "\\ModelFiles\\ton\\ton.md2");
+                        Barrels[i].scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.6f));
+                        Barrels[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
+                        int x = random.Next(10, 990);
+                        int y = 0;
+                        int z = random.Next(10, 990);
+                        vec3 pos = new vec3(x, y, z);
+                        Barrels[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
+                    }
+                    #endregion
+                    break;
+                #endregion
+                #region LIVING
+                case skyboxType.LIVING:
+                    #region FURNI
+                    livingFurni = new List<Model3D>();
+                    for (int i = 0; i < 7; i++)
+                        livingFurni.Add(new Model3D());
+                    #region LoadFile
+                    livingFurni[0].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "sofa3.obj");
+                    texUnit_counter++;
+                    livingFurni[1].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "rug.obj");
+                    texUnit_counter++;
+                    livingFurni[2].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "oldtv.obj");
+                    texUnit_counter++;
+                    livingFurni[3].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "table2.obj");
+                    texUnit_counter++;
+                    livingFurni[4].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "plant.obj");
+                    texUnit_counter++;
+                    livingFurni[5].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "floor_lamp.obj");
+                    texUnit_counter++;
+                    livingFurni[6].LoadFile(projectPath + "\\ModelFiles\\LIVING ROOM", texUnit_counter % 32, "decoSet.obj");
+                    texUnit_counter++;
+                    #endregion
+                    #region Transformations
+                    for (int i = 0; i < 5; i++)
+                        livingFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(210, 1, 107));
+                    livingFurni[5].transmatrix = glm.translate(new mat4(1), new vec3(180, 0, 15));
+                    livingFurni[6].transmatrix = glm.translate(new mat4(1), new vec3(15, 0, 150));
+                    #endregion
+                    #endregion
+
+                    #region Radio Model
+                    radio = new InteractiveModel("radio", "radio", texUnit_counter % 32, 8, modelType.RADIO, 0);
+                    texUnit_counter++;
+                    radio.Translate(15, 30, 150);
+                    #endregion
+                    break;
+                #endregion
+                #region BEDROOM
+                case skyboxType.BEDROOM:
+                    #region Bedroom Furni
+                    bedroomFurni = new List<Model3D>()
+                {
+                    new Model3D(), //Bed
+                    new Model3D(), //Side1
+                    new Model3D(), //Side2
+                    new Model3D(), //Closet
+                    new Model3D(), //Chair
+                };
+                    #region LoadFile
+                    bedroomFurni[0].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "bed.obj");
+                    texUnit_counter++;
+                    bedroomFurni[1].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "side1.obj");
+                    texUnit_counter++;
+                    bedroomFurni[2].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "side2.obj");
+                    texUnit_counter++;
+                    bedroomFurni[3].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "closet.obj");
+                    texUnit_counter++;
+                    bedroomFurni[4].LoadFile(projectPath + "\\ModelFiles\\bedroom", texUnit_counter % 32, "chair.obj");
+                    texUnit_counter++;
+                    #endregion
+                    #region Transformations
+                    for (int i = 0; i < bedroomFurni.Count; i++)
+                    {
+                        bedroomFurni[i].scalematrix = glm.scale(new mat4(1), new vec3(.3f, .3f, .3f));
+                        bedroomFurni[i].rotmatrix = glm.rotate(-90.0f / 180 * 3.141592f, new vec3(0, 1, 0));
+                    }
+                    for (int i = 0; i < 3; i++)
+                        bedroomFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(245, 0, 150));
+                    bedroomFurni[3].transmatrix = glm.translate(new mat4(1), new vec3(10, 0, 150));
+                    bedroomFurni[4].transmatrix = glm.translate(new mat4(1), new vec3(110, 0, 250));
+                    #endregion
+                    #endregion
+                    break;
+                #endregion
+                #region KITCHEN
+                case skyboxType.KITCHEN:
+                    #region FURNI
+                    kitchen = new Model3D();
+                    kitchen.LoadFile(projectPath + "\\ModelFiles\\kitchen", texUnit_counter % 32, "kitSet.obj");
+                    texUnit_counter++;
+                    kitchen.scalematrix = glm.scale(new mat4(1), new vec3(7, 7, 7));
+                    kitchen.transmatrix = glm.translate(new mat4(1), new vec3(235, 0, 10));
+                    #endregion
+                    break;
+                #endregion
+                #region BATHROOM
+                case skyboxType.BATHROOM:
+                    break;
+                #endregion
+                #region CLOSET
+                case skyboxType.CLOSET:
+                    break;
+                #endregion
+                #region BASEMENT
+                case skyboxType.BASEMENT:
+                    break;
+                    #endregion
+            }
+            PrevoiuslyLoaded[(int)SKYBOX] = true;
+        }
+        #endregion
+
+        public void Flush_Existing_IOBJ()
+        {
+            #region Doors
+            for (int i = 0; i < doors.Count; i++)
+                doors[i].isDrawn = false;
+            #endregion
+
+            #region Garbages
+			//Menna
+            #endregion
+        }
+
         public void Draw()
         {
-            Gl.glClear(Gl.GL_COLOR_BUFFER_BIT|Gl.GL_DEPTH_BUFFER_BIT);
+            //LoadSkyboxModels();
+
+            Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
 
             Gl.glUniformMatrix4fv(projID, 1, Gl.GL_FALSE, ProjectionMatrix.to_array());
             Gl.glUniformMatrix4fv(viewID, 1, Gl.GL_FALSE, ViewMatrix.to_array());
 
             sh.UseShader();
 
-            skybox.Draw(transID);
+            skyboxes[currentSkyboxID].Draw(transID);
 
-            #region 3D Models drawing
-            #region working models
-            //BED.Draw(transID);
-            //SINK.Draw(transID);
-            //BENCH.Draw(transID);
-            //CHAIR.Draw(transID);
-            //CHAIR1.Draw(transID);
-            //CLOSET.Draw(transID);
-            //HANDDRYER.Draw(transID);
-            //KAST1.Draw(transID);
-            //LAMP.Draw(transID);
-            //LIGHT2.Draw(transID);
-            //LIGHT3.Draw(transID);
-            //LIGHT5.Draw(transID);
-            //LIGHT6.Draw(transID);
-            //SOAP.Draw(transID);
-            //SODAMACHINE.Draw(transID);
-            //TABLE.Draw(transID);
-            //TL.Draw(transID);
-            //TOILET.Draw(transID);
-            //TPAPER.Draw(transID);
-            //WATERDISP.Draw(transID);
-            #endregion
+            #region Skybox Forrest
+            if (currentSkyboxID == 0)
+            {
+                g_down.Draw(transID);
 
-            #region Trees Models
-            Gl.glEnable(Gl.GL_BLEND);
-            Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
-            for (int i=0; i < num_trees; i++)
-                Trees[i].Draw(transID);
-            Gl.glDisable(Gl.GL_BLEND);
-            #endregion
+                #region Garbages Models
+				//Menna
+                #endregion
 
-            #region Lights Models
-            for (int i=0; i < num_lights; i++)
-                Lights[i].Draw(transID);
-            #endregion
+                #region 3D Models drawing
+                watchtower.Draw(transID);
+                house_obj.Draw(transID);
+                car.Draw(transID);
+                phone.Draw(transID);
+                doors[0].Draw(transID);
 
-            #region Car Model
-            car.Draw(transID);
-            #endregion
+                #region Trees Models
+                Gl.glEnable(Gl.GL_BLEND);
+                Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
+                for (int i = 0; i < num_trees; i++)
+                    Trees[i].Draw(transID);
+                Gl.glDisable(Gl.GL_BLEND);
+                #endregion
 
-            #region Phone Model
-            phone.Draw(transID);
-            #endregion
+                #region Lights Models
+                for (int i = 0; i < num_lights; i++)
+                    Lights[i].Draw(transID);
+                #endregion
 
-            #region Grass Models
-            for (int i = 0; i < num_grass; i++)
-                Grass[i].Draw(transID);
-            #endregion
+                #region Grass Models
+                for (int i = 0; i < num_grass; i++)
+                    Grass[i].Draw(transID);
+                #endregion
 
-            #region Barrels Models
-            for (int i = 0; i < num_barrels; i++)
-                Barrels[i].Draw(transID);
+                #region Barrels Models
+                for (int i = 0; i < num_barrels; i++)
+                    Barrels[i].Draw(transID);
+                #endregion
+
+                #endregion
+            }
             #endregion
-           
+            #region Living Room
+            if (currentSkyboxID == 1)
+            {
+                for (int i = 0; i < 3; i++)
+                    doors[i].Draw(transID);
+                for (int i = 0; i < livingFurni.Count; i++)
+                    livingFurni[i].Draw(transID);
+				//esraa
+			}
             #endregion
+            #region Bedroom
+            if (currentSkyboxID == 2)
+            {
+                doors[1].Draw(transID);
+                doors[3].Draw(transID);
+                doors[4].Draw(transID);
+                for (int i = 0; i < bedroomFurni.Count; i++)
+                    bedroomFurni[i].Draw(transID);
+            }
+            #endregion
+            #region Kitchen
+            if (currentSkyboxID == 3)
+            {
+                doors[2].Draw(transID);
+                kitchen.Draw(transID);
+            }
+            #endregion
+            #region Bathroom
+            if (currentSkyboxID == 4)
+            {
+                doors[3].Draw(transID);
+            }
+            #endregion
+            #region Closet
+            if (currentSkyboxID == 5)
+            {
+                doors[4].Draw(transID);
+            }
+            #endregion
+            #region Basement
+            if (currentSkyboxID == 6)
+            {
+            }
+            #endregion
+            
         }
         public void Update(float deltaTime)
         {
@@ -477,6 +744,39 @@ namespace Graphics
         public void CleanUp()
         {
             sh.DestroyShader();
+        }
+
+        public modelType InteractiveCheck()
+        {
+            float DistanceX, DistanceY, DistanceZ;
+
+            #region Doors
+            for (int i = 0; i < doors.Count; i++)
+            {
+                if (!doors[i].isDrawn)
+                    continue;
+                DistanceX = Math.Abs(cam.mPosition.x - doors[i].position.x);
+                DistanceY = Math.Abs(cam.mPosition.y - doors[i].position.y);
+                DistanceZ = Math.Abs(cam.mPosition.z - doors[i].position.z);
+                if (DistanceX < doors[i].boundingBox.x / 2
+                  && DistanceY < doors[i].boundingBox.y / 2
+                  && DistanceZ < doors[i].boundingBox.z / 2)
+                {
+                    doors[i].Event();
+                    return modelType.DOOR;
+                }
+            }
+            #endregion
+
+            #region Garbages
+			//Menna
+            #endregion
+
+            #region radio check
+			//Esraa
+            #endregion
+
+            return modelType.NULL;
         }
     }
 }

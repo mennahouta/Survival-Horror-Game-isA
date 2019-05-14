@@ -31,9 +31,12 @@ namespace Graphics
         public modelType type;
         public int objID;
         public Boolean isDrawn;
+        vec3 old_scaling = new vec3(1, 1, 1);
+        
         public static bool radio_ON = false; // for the interaction with the radio
         public static MP3_player radio_sound = new MP3_player();
-        vec3 old_scaling = new vec3(1, 1, 1);
+        System.Media.SoundPlayer player;
+        
         public InteractiveModel(String folderName, String modelName, int texUnit, float rangeOfInteraction, modelType t, int ID)
         {
             obj = new Model3D();
@@ -211,6 +214,12 @@ namespace Graphics
                     Renderer.cam.Reset(95, 50, 280, 20, 20, 150, 0, 1, 0);
                     break;
             }
+            //Doors sounds
+            player = new System.Media.SoundPlayer(Renderer.projectPath+@"Sounds\door open with a squeak.wav");
+            player.Play();
+            Thread.Sleep(2260);
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"Sounds\door close with a squeak.wav");
+            player.Play();
         }
 
         public void GARBAGE_Event()
@@ -236,7 +245,18 @@ namespace Graphics
 
         public void RADIO_Event()
         {
-            //Esraa
+            //turn on or off
+            //the static noise
+            if (radio_ON)
+            {
+                radio_sound.stop();
+                radio_ON = false;
+            }
+            else
+            {
+                radio_sound.play();
+                radio_ON = true;
+            }
         }
 
         public void TEXT_Event()

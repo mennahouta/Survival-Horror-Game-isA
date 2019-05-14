@@ -13,7 +13,14 @@ namespace Graphics
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
 
-		//Menna
+		List<String> garbageMessages = new List<string>(){
+            "You have found the key, I'm impressed!",
+            "Garbage. Garbage everywhere.",
+            "Nothing of use here.",
+            "Why are you checking other people's garbage? *suspicious eyes*",
+            "People can be very messy.",
+            "You're going to be very smelly."
+        };
 		
         float deltaTime;
         public GraphicsForm()
@@ -91,9 +98,20 @@ namespace Graphics
             if (e.KeyChar == 'e')
             {
                 modelType currentInteractionType = renderer.InteractiveCheck();
-                
+                if (currentInteractionType == modelType.DOOR) {
+                    if (Renderer.doors[0].isDrawn)
+                        MessageBox.Show(Renderer.currentSkyboxID.ToString());
+                }
+
                 #region Garbage interaction
-				//Menna
+                if (currentInteractionType == modelType.GARBAGE) {
+                    if (Renderer.playerHasKey)
+                        MessageBox.Show(garbageMessages[0]);
+                    else {
+                        Random random = new Random();
+                        MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
+                    }
+                }
                 #endregion
             }
 

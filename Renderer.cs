@@ -56,7 +56,10 @@ namespace Graphics
 
 		//Esraa
 		
-		//Menna
+		public static List<InteractiveModel> garbages;
+        int numOfGarbages;
+        public static int key_garbageID;
+        public static bool playerHasKey = false;
 		
         int texUnit_counter = 0;
 
@@ -328,7 +331,31 @@ namespace Graphics
             #endregion
 
             #region Garbages initialization
-			//Menna
+			garbages = new List<InteractiveModel>();
+            numOfGarbages = random.Next(2, 7);
+            bool garbageBag = true;
+            for (int i = 0; i < numOfGarbages; i++) {
+                //if (garbageBag)
+                    garbages.Add(new InteractiveModel("garbage_bag", "garbage_bag", texUnit_counter % 32, 7, modelType.GARBAGE, i));
+                //else
+                    //garbages.Add(new InteractiveModel("scattered_garbage", "scattered_garbage", (texUnit_counter + 1) % 32, 7, modelType.GARBAGE, i));
+
+                int x = random.Next(0, (int)skyboxes[0].maxX);
+                int y = 0;
+                int z = random.Next(0, (int)skyboxes[0].maxZ);
+                vec3 pos = new vec3(x, y, z);
+
+                float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
+                if (dist <= car_radius) {
+                    x -= (int)(2 * car_radius);
+                    z -= (int)(2 * car_radius);
+                }
+                garbages[i].Translate(x, y, z);
+
+                garbageBag = !garbageBag;
+            }
+            texUnit_counter += 1;
+            key_garbageID = random.Next(0, numOfGarbages);
             #endregion
 
             #region Lights Models
@@ -623,7 +650,8 @@ namespace Graphics
             #endregion
 
             #region Garbages
-			//Menna
+			for(int i = 0; i < numOfGarbages; i++)
+                garbages[i].isDrawn = false;
             #endregion
         }
 
@@ -646,7 +674,8 @@ namespace Graphics
                 g_down.Draw(transID);
 
                 #region Garbages Models
-				//Menna
+				for (int i = 0; i < numOfGarbages; i++)
+                    garbages[i].Draw(transID);
                 #endregion
 
                 #region 3D Models drawing
@@ -769,7 +798,19 @@ namespace Graphics
             #endregion
 
             #region Garbages
-			//Menna
+			for (int i = 0; i < numOfGarbages; i++) {
+                if (!garbages[i].isDrawn)
+                    continue;
+                DistanceX = Math.Abs(cam.mPosition.x - garbages[i].position.x);
+                DistanceY = Math.Abs(cam.mPosition.y - garbages[i].position.y);
+                DistanceZ = Math.Abs(cam.mPosition.z - garbages[i].position.z);
+                if (DistanceX < garbages[i].boundingBox.x / 2
+                  && DistanceY < garbages[i].boundingBox.y / 2
+                  && DistanceZ < garbages[i].boundingBox.z / 2) {
+                    garbages[i].Event();
+                    return modelType.GARBAGE;
+                }
+            }
             #endregion
 
             #region radio check

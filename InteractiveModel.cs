@@ -215,7 +215,8 @@ namespace Graphics
 
         public void GARBAGE_Event()
         {
-            //Menna
+            if(objID == Renderer.key_garbageID)
+                Renderer.playerHasKey = true;
         }
 
         public void BARRELS_Event()

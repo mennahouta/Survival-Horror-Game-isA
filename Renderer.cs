@@ -344,12 +344,7 @@ namespace Graphics
                 int y = 0;
                 int z = random.Next(0, (int)skyboxes[0].maxZ);
                 vec3 pos = new vec3(x, y, z);
-
-                float dist = (float)Math.Sqrt((pos.x - car_pos.x) * (pos.x - car_pos.x) + (pos.y - car_pos.y) * (pos.y - car_pos.y) + (pos.z - car_pos.z) * (pos.z - car_pos.z));
-                if (dist <= car_radius) {
-                    x -= (int)(2 * car_radius);
-                    z -= (int)(2 * car_radius);
-                }
+		    
                 garbages[i].Translate(x, y, z);
 
                 garbageBag = !garbageBag;

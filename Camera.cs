@@ -1,4 +1,4 @@
-﻿using GlmNet;
+using GlmNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace Graphics
         mat4 mViewMatrix;
         mat4 mProjectionMatrix;
         float PersonHeight;
+        vec3 PersonBoundingBox = new vec3(0, 0, 0);
         public Camera()
         {
             Reset(0, 0, 5, 0, 0, 0, 0, 1, 0);
@@ -59,6 +60,7 @@ namespace Graphics
             mViewMatrix = glm.lookAt(mPosition, centerPos, mUp);
 
             PersonHeight = eyeY;
+            PersonBoundingBox.y = PersonHeight;
         }
 
         public void UpdateViewMatrix()
@@ -107,24 +109,54 @@ namespace Graphics
                     result.z >= 3 && result.z <= Renderer.skyboxes[Renderer.currentSkyboxID].maxZ);
         }
 
+        public bool checkCollision(float dist, short axis)
+        {
+            float DistanceX, DistanceY, DistanceZ;
+
+            vec3 result;
+
+            if (axis == 0)      //Z
+                result = mDirection;
+            else if (axis == 1) //X
+                result = mRight;
+            else                //Y
+                result = mUp;
+            result *= dist;
+            result += mPosition;
+
+            result.y /= 2;
+            for (int i = 0; i < Renderer.boundingBoxes.Count; i++)
+            {
+                //if (!Renderer.boundingBoxes[i].isDrawn)
+                  //  continue;
+                DistanceX = Math.Abs(result.x - Renderer.boundingBoxes[i].position.x);
+                DistanceY = Math.Abs(result.y - Renderer.boundingBoxes[i].position.y);
+                DistanceZ = Math.Abs(result.z - Renderer.boundingBoxes[i].position.z);
+                if (DistanceX < (PersonBoundingBox.x + Renderer.boundingBoxes[i].boundingBox.x) / 2
+                 && DistanceY < (PersonBoundingBox.y + Renderer.boundingBoxes[i].boundingBox.y) / 2
+                 && DistanceZ < (PersonBoundingBox.z + Renderer.boundingBoxes[i].boundingBox.z) / 2)
+                    return false;
+            }
+            return true;
+        }
 
         public void Walk(float dist)
         {
-            if (!checkPos(dist, 0))
+            if (!checkPos(dist, 0) || !checkCollision(dist, 0))
                 return;
             mPosition += dist * mDirection;
             mPosition.y = PersonHeight;
         }
         public void Strafe(float dist)
         {
-            if (!checkPos(dist, 1))
+            if (!checkPos(dist, 1) || !checkCollision(dist, 1))
                 return;
             mPosition += dist * mRight;
             mPosition.y = PersonHeight;
         }
         public void Fly(float dist)
         {
-            if (!checkPos(dist, 2))
+            if (!checkPos(dist, 2) || !checkCollision(dist, 2))
                 return;
             mPosition += dist * mUp;
             mPosition.y = PersonHeight;

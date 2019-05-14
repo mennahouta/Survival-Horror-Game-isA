@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,7 @@ using GlmNet;
 using Tao.OpenGl;
 using System.IO;
 using Assimp;
-
+using System.Threading;
 namespace Graphics
 {
     enum modelType
@@ -24,19 +24,17 @@ namespace Graphics
     }
     class InteractiveModel
     {
-        Model3D obj;
+        public Model3D obj;
         public float range;
         public vec3 position;
-        public vec3 boundingBox; //x: width, y: height, z: depth
+        public vec3 interactionBoundingBox; //x: width, y: height, z: depth
         public modelType type;
         public int objID;
         public Boolean isDrawn;
-        vec3 old_scaling = new vec3(1, 1, 1);
-        
         public static bool radio_ON = false; // for the interaction with the radio
         public static MP3_player radio_sound = new MP3_player();
         System.Media.SoundPlayer player;
-        
+        vec3 old_scaling = new vec3(1, 1, 1);
         public InteractiveModel(String folderName, String modelName, int texUnit, float rangeOfInteraction, modelType t, int ID)
         {
             obj = new Model3D();
@@ -47,11 +45,12 @@ namespace Graphics
             objID = ID;
             isDrawn = false;
             #region BoundingBox intialization
-            boundingBox = new vec3();
+            interactionBoundingBox = new vec3();
+
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
             float minDepth  = float.MaxValue, maxDepth  = float.MinValue;
-            foreach(Model m in obj.meshes)
+            foreach (Model m in obj.meshes)
                 foreach(vec3 v in m.vertices)
                 {
                     minWidth = Math.Min(minWidth, v.x);
@@ -63,19 +62,19 @@ namespace Graphics
                     minDepth = Math.Min(minDepth, v.z);
                     maxDepth = Math.Max(maxDepth, v.z);
                 }
-            boundingBox.x = range * (maxWidth - minWidth);
-            boundingBox.y = range * (maxHeight - minHeight);
-            boundingBox.z = range * (maxDepth - minDepth);
+            interactionBoundingBox.x = range * (maxWidth - minWidth);
+            interactionBoundingBox.y = range * (maxHeight - minHeight);
+            interactionBoundingBox.z = range * (maxDepth - minDepth);
             #endregion
         }
 
         public void Scale(float x, float y, float z)
         {
             obj.scalematrix = glm.scale(new mat4(1), new vec3(x, y, z));
-            boundingBox.x /= old_scaling.x;
-            boundingBox.y /= old_scaling.y;
-            boundingBox.z /= old_scaling.z;
-            boundingBox *= new vec3(x, y, z);
+            interactionBoundingBox.x /= old_scaling.x;
+            interactionBoundingBox.y /= old_scaling.y;
+            interactionBoundingBox.z /= old_scaling.z;
+            interactionBoundingBox *= new vec3(x, y, z);
             old_scaling = new vec3(x, y, z);
         }
 
@@ -129,11 +128,15 @@ namespace Graphics
             //access current loaded skybox,
             //update it, and set the renderer 
             //which room is the current
+            bool stBox = false;
+
             switch (objID)
             {
                 case 0:
                     if (Renderer.playerHasKey)
+                    {
                         Renderer.currentSkyboxID = (Renderer.currentSkyboxID == 0) ? 1 : 0;
+                    }
                     break;
                 case 1:
                     Renderer.currentSkyboxID = (Renderer.currentSkyboxID == 1) ? 2 : 1;
@@ -214,7 +217,6 @@ namespace Graphics
                     Renderer.cam.Reset(95, 50, 280, 20, 20, 150, 0, 1, 0);
                     break;
             }
-            //Doors sounds
             player = new System.Media.SoundPlayer(Renderer.projectPath+@"Sounds\door open with a squeak.wav");
             player.Play();
             Thread.Sleep(2260);
@@ -224,7 +226,7 @@ namespace Graphics
 
         public void GARBAGE_Event()
         {
-            if(objID == Renderer.key_garbageID)
+            if (objID == Renderer.key_garbageID)
                 Renderer.playerHasKey = true;
         }
 

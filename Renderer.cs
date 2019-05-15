@@ -22,14 +22,7 @@ namespace Graphics
         MAX_SKYBOXES
     }
 
-
-    public struct modelPlacement
-    {
-        public vec3 boundingBox;   //x: width, y: height, z: depth
-        public vec3 position;     //center point for the transformation operations
-        public Boolean isDrawn;
-    }
-
+    
     class Renderer
     {
         public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
@@ -102,8 +95,9 @@ namespace Graphics
 
         #endregion
 
-        #region Collision Boundingbox declaration
-        public static List<modelPlacement> boundingBoxes;
+        #region Collision Boundingboxes declaration
+        public static List<Model3D> Model3D_BoundingBoxes;
+        public static List<InteractiveModel> InteractiveModels_BoundingBoxes;
         #endregion
         public void Initialize()
         {   
@@ -186,7 +180,8 @@ namespace Graphics
 
 
             #region Collision Boundingboxes list intialization
-            boundingBoxes = new List<modelPlacement>(0);
+            Model3D_BoundingBoxes = new List<Model3D>();
+            InteractiveModels_BoundingBoxes = new List<InteractiveModel>();
             #endregion
 
             #region Doors initialization
@@ -214,8 +209,10 @@ namespace Graphics
             #endregion
 
             #region Doors collision boundingboxes
-            for (int i = 0; i < 5; i++)
-                boundingBoxes.Add(getBoundingBox(doors[i].position, doors[i].obj));
+            for (int i = 0; i < 5; i++) {
+                getBoundingBox(doors[i].position, doors[i].obj);
+                InteractiveModels_BoundingBoxes.Add(doors[i]);
+            }
             #endregion
             #endregion
 
@@ -251,12 +248,15 @@ namespace Graphics
             for (int i = 0; i < 3; i++)
             {
                 bedroomFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(245, 0, 150));
-                boundingBoxes.Add(getBoundingBox(new vec3(245, 0, 150), bedroomFurni[i]));
+                getBoundingBox(new vec3(245, 0, 150), bedroomFurni[i]);
+                Model3D_BoundingBoxes.Add(bedroomFurni[i]);
             }
             bedroomFurni[3].transmatrix = glm.translate(new mat4(1), new vec3(10, 0, 150));
-            boundingBoxes.Add(getBoundingBox(new vec3(10, 0, 150), bedroomFurni[3]));
+            getBoundingBox(new vec3(10, 0, 150), bedroomFurni[3]);
+            Model3D_BoundingBoxes.Add(bedroomFurni[3]);
             bedroomFurni[4].transmatrix = glm.translate(new mat4(1), new vec3(110, 0, 250));
-            boundingBoxes.Add(getBoundingBox(new vec3(110, 0, 250), bedroomFurni[4]));
+            getBoundingBox(new vec3(110, 0, 250), bedroomFurni[4]);
+            Model3D_BoundingBoxes.Add(bedroomFurni[4]);
             #endregion
             #endregion
 
@@ -284,7 +284,8 @@ namespace Graphics
             for (int i = 0; i < 5; i++)
             {
                 livingFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(210, 1, 107));
-                boundingBoxes.Add(getBoundingBox(new vec3(210, 1, 107), livingFurni[i]));
+                getBoundingBox(new vec3(210, 1, 107), livingFurni[i]);
+                Model3D_BoundingBoxes.Add(livingFurni[i]);
             }
             livingFurni[5].transmatrix = glm.translate(new mat4(1), new vec3(180, 0, 15));
             boundingBoxes.Add(getBoundingBox(new vec3(180, 0, 15), livingFurni[5]));
@@ -872,7 +873,7 @@ namespace Graphics
 
             return modelType.NULL;
         }
-        public modelPlacement getBoundingBox(vec3 objPosition, Model3D modelObj)
+        public void getBoundingBox(vec3 objPosition, Model3D modelObj)
         {
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
@@ -889,13 +890,11 @@ namespace Graphics
                     minDepth = Math.Min(minDepth, v.z);
                     maxDepth = Math.Max(maxDepth, v.z);
                 }
-            modelPlacement curBoundingBox = new modelPlacement();
-            curBoundingBox.boundingBox.x = (maxWidth - minWidth);
-            curBoundingBox.boundingBox.y = (maxHeight - minHeight);
-            curBoundingBox.boundingBox.z = (maxDepth - minDepth);
-            curBoundingBox.position = objPosition;
-            curBoundingBox.isDrawn = false;
-            return curBoundingBox;
+            modelObj.CollisionboundingBox.x = (maxWidth - minWidth);
+            modelObj.CollisionboundingBox.y = (maxHeight - minHeight);
+            modelObj.CollisionboundingBox.z = (maxDepth - minDepth);
+            modelObj.position = objPosition;
+            modelObj.isDrawn = false;
         }
     }
 }

@@ -17,7 +17,6 @@ namespace Graphics
             "You have found the key, I'm impressed!",
             "Garbage. Garbage everywhere.",
             "Nothing of use here.",
-            "Why are you checking other people's garbage? *suspicious eyes*",
             "People can be very messy.",
             "You're going to be very smelly."
         };
@@ -99,7 +98,7 @@ namespace Graphics
             {
                 modelType currentInteractionType = renderer.InteractiveCheck();
                 if (currentInteractionType == modelType.DOOR) {
-                    if (Renderer.doors[0].isDrawn)
+                    if (Renderer.doors[0].obj.isDrawn)
                         MessageBox.Show(Renderer.currentSkyboxID.ToString());
                 }
 

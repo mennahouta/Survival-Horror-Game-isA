@@ -36,6 +36,12 @@ namespace Graphics
         mat4 ProjectionMatrix, ViewMatrix, modelmatrix;
         #endregion
 
+        #region Models Lists Declaration
+        //for BoundingBoxes and isDrawn
+        public static List<Model3D> Models_3D;
+        public static List<InteractiveModel> Models_Interactive;
+        #endregion
+
         int EyePositionID,  AmbientLightID, DataID;
 
         static public Camera cam;
@@ -95,10 +101,6 @@ namespace Graphics
 
         #endregion
 
-        #region Collision Boundingboxes declaration
-        public static List<Model3D> Model3D_BoundingBoxes;
-        public static List<InteractiveModel> InteractiveModels_BoundingBoxes;
-        #endregion
         public void Initialize()
         {   
             #region Shaders intialization
@@ -180,11 +182,12 @@ namespace Graphics
 
 
             #region Collision Boundingboxes list intialization
-            Model3D_BoundingBoxes = new List<Model3D>();
-            InteractiveModels_BoundingBoxes = new List<InteractiveModel>();
+            Models_3D = new List<Model3D>();
+            Models_Interactive = new List<InteractiveModel>();
             #endregion
 
             #region Doors initialization
+            #region Doors list
             doors = new List<InteractiveModel>()
             {
                 new InteractiveModel("door", "door", texUnit_counter%32, 15, modelType.DOOR, 0),        //0: Front door, from 0 <-> 1
@@ -195,7 +198,7 @@ namespace Graphics
                 new InteractiveModel("door", "door_in", texUnit_counter%32, 5, modelType.DOOR, 5),     //5: trapDr, from 5 ->6 (game over)
             };
             texUnit_counter++;
-
+            #endregion
             #region Transformations
             doors[0].Scale(.5f, .5f, .5f);
             for (int i = 1; i < doors.Count; i++)
@@ -207,17 +210,17 @@ namespace Graphics
             doors[3].Translate(80, 0, 0);
             doors[4].Translate(270, 0, 300);
             #endregion
-
             #region Doors collision boundingboxes
             for (int i = 0; i < 5; i++) {
-                getBoundingBox(doors[i].position, doors[i].obj);
-                InteractiveModels_BoundingBoxes.Add(doors[i]);
+                setCollisionBoundingBox(doors[i].position, doors[i].obj);
+                Models_Interactive.Add(doors[i]);
             }
             #endregion
             #endregion
 
             Random random = new Random();
             #region 3D Models intialization
+
             #region Bedroom Furni
             bedroomFurni = new List<Model3D>()
             {
@@ -248,15 +251,17 @@ namespace Graphics
             for (int i = 0; i < 3; i++)
             {
                 bedroomFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(245, 0, 150));
-                getBoundingBox(new vec3(245, 0, 150), bedroomFurni[i]);
-                Model3D_BoundingBoxes.Add(bedroomFurni[i]);
+                setCollisionBoundingBox(new vec3(245, 0, 150), bedroomFurni[i]);
+                Models_3D.Add(bedroomFurni[i]);
             }
             bedroomFurni[3].transmatrix = glm.translate(new mat4(1), new vec3(10, 0, 150));
-            getBoundingBox(new vec3(10, 0, 150), bedroomFurni[3]);
-            Model3D_BoundingBoxes.Add(bedroomFurni[3]);
             bedroomFurni[4].transmatrix = glm.translate(new mat4(1), new vec3(110, 0, 250));
-            getBoundingBox(new vec3(110, 0, 250), bedroomFurni[4]);
-            Model3D_BoundingBoxes.Add(bedroomFurni[4]);
+            #endregion
+            #region Bedroom Furni Collision BB
+            setCollisionBoundingBox(new vec3(10, 0, 150), bedroomFurni[3]);
+            Models_3D.Add(bedroomFurni[3]);
+            setCollisionBoundingBox(new vec3(110, 0, 250), bedroomFurni[4]);
+            Models_3D.Add(bedroomFurni[4]);
             #endregion
             #endregion
 
@@ -284,24 +289,33 @@ namespace Graphics
             for (int i = 0; i < 5; i++)
             {
                 livingFurni[i].transmatrix = glm.translate(new mat4(1), new vec3(210, 1, 107));
-                getBoundingBox(new vec3(210, 1, 107), livingFurni[i]);
-                Model3D_BoundingBoxes.Add(livingFurni[i]);
+                setCollisionBoundingBox(new vec3(210, 1, 107), livingFurni[i]);
+                Models_3D.Add(livingFurni[i]);
             }
             livingFurni[5].transmatrix = glm.translate(new mat4(1), new vec3(180, 0, 15));
-            boundingBoxes.Add(getBoundingBox(new vec3(180, 0, 15), livingFurni[5]));
             livingFurni[6].transmatrix = glm.translate(new mat4(1), new vec3(15, 0, 150));
-            boundingBoxes.Add(getBoundingBox(new vec3(15, 0, 150), livingFurni[6]));
+            #endregion
+            #region Living Furni Collision BB
+            setCollisionBoundingBox(new vec3(180, 0, 15), livingFurni[5]);
+            Models_3D.Add(livingFurni[5]);
+            setCollisionBoundingBox(new vec3(15, 0, 150), livingFurni[6]);
+            Models_3D.Add(livingFurni[6]);
             #endregion
             #endregion
 
             #region Kitchen
-            //kitchen = new Model3D();
-            //kitchen.LoadFile(projectPath + "\\ModelFiles\\kitchen", texUnit_counter % 32, "kitSet.obj");
-            //texUnit_counter++;
-            //kitchen.scalematrix = glm.scale(new mat4(1), new vec3(7, 7, 7));
-            //kitchen.transmatrix = glm.translate(new mat4(1), new vec3(235, 0, 10));
+            #region LoadFile
+            kitchen = new Model3D();
+            kitchen.LoadFile(projectPath + "\\ModelFiles\\kitchen", texUnit_counter % 32, "kitSet.obj");
+            texUnit_counter++;
+            #endregion
+            #region Transformations
+            kitchen.scalematrix = glm.scale(new mat4(1), new vec3(7, 7, 7));
+            kitchen.transmatrix = glm.translate(new mat4(1), new vec3(235, 0, 10));
+            #endregion
             #region Kitchen collision boundingboxes
-            //boundingBoxes.Add(getBoundingBox(new vec3(235, 0, 10), kitchen));
+            setCollisionBoundingBox(new vec3(235, 0, 10), kitchen);
+            Models_3D.Add(kitchen);
             #endregion
             #endregion
 
@@ -310,15 +324,17 @@ namespace Graphics
             //watchtower.LoadFile(projectPath + "\\ModelFiles\\watchtower", 0, "wooden watch tower.obj");
             //watchtower.scalematrix = glm.scale(new mat4(1), new vec3(20, 30, 20));
             //watchtower.transmatrix = glm.translate(new mat4(1), new vec3(400, 0, 400));
-            //boundingBoxes.Add(getBoundingBox(new vec3(400, 0, 400), watchtower));
+            //setCollisionBoundingBox(new vec3(400, 0, 400), watchtower);
+            //Models_3D.Add(watchtower);
             #endregion
 
             #region house
-            //house_obj = new Model3D();
-            //house_obj.LoadFile(projectPath + "\\ModelFiles\\house_obj", 7, "house-low-rus-obj.obj");
-            //house_obj.scalematrix = glm.scale(new mat4(1), new vec3(.5f, .5f, .5f));
-            //house_obj.transmatrix = glm.translate(new mat4(1), new vec3(700, 0, 500));
-            //boundingBoxes.Add(getBoundingBox(new vec3(700, 0, 500), house_obj));
+            house_obj = new Model3D();
+            house_obj.LoadFile(projectPath + "\\ModelFiles\\house_obj", 7, "house-low-rus-obj.obj");
+            house_obj.scalematrix = glm.scale(new mat4(1), new vec3(.5f, .5f, .5f));
+            house_obj.transmatrix = glm.translate(new mat4(1), new vec3(700, 0, 500));
+            setCollisionBoundingBox(new vec3(700, 0, 500), house_obj);
+            Models_3D.Add(house_obj);
             #endregion
 
             #region Phone Model
@@ -326,7 +342,8 @@ namespace Graphics
             phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
             phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
             phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 2, 800));
-           // boundingBoxes.Add(getBoundingBox(new vec3(180, 2, 800), phone));
+            setCollisionBoundingBox(new vec3(180, 2, 800), phone);
+            Models_3D.Add(phone);
             #endregion
 
             #region Grass Models
@@ -343,7 +360,8 @@ namespace Graphics
                 int y = 0;
                 int z = random.Next(10, 990);
                 Grass[i].transmatrix = glm.translate(new mat4(1), new vec3(x, y, z));
-                //boundingBoxes.Add(getBoundingBox(new vec3(x, y, z), Grass[i]));
+                //setCollisionBoundingBox(new vec3(x, y, z), Grass[i]);
+                //Models_3D.Add(Grass[i]);
             }
             #endregion
 
@@ -352,7 +370,8 @@ namespace Graphics
             car.LoadFile(projectPath + "\\ModelFiles\\car", texUnit_counter % 32, "delorean.obj");
             texUnit_counter++;
             car.transmatrix = glm.translate(new mat4(1), new vec3(200, 0, 800));
-            boundingBoxes.Add(getBoundingBox(new vec3(200, 0, 800), car));
+            setCollisionBoundingBox(new vec3(200, 0, 800), car);
+            Models_3D.Add(car);
             #endregion
 
             #region Trees Models
@@ -368,29 +387,32 @@ namespace Graphics
                 int z = random.Next(10, 990);
                 vec3 pos = new vec3(x, y, z);
                 Trees[i].transmatrix = glm.translate(new mat4(1), new vec3(x, y, z));
-                boundingBoxes.Add(getBoundingBox(new vec3(x, y, z), Trees[i]));
+                setCollisionBoundingBox(new vec3(x, y, z), Trees[i]);
+                Models_3D.Add(Trees[i]);
             }
             #endregion
 
             #region Garbages initialization
             garbages = new List<InteractiveModel>();
-            numOfGarbages = random.Next(2, 7);
-            bool garbageBag = true;
+            List<vec3> garbagePos = new List<vec3>{
+                new vec3(700, 0, 630),
+                new vec3(650, 0, 630),
+                new vec3(630, 0, 515),
+                new vec3(630, 0, 495),
+                new vec3(560, 0, 450)
+            };
+            numOfGarbages = garbagePos.Count;
             for (int i = 0; i < numOfGarbages; i++)
             {
-                //if (garbageBag)
-                garbages.Add(new InteractiveModel("garbage_bag", "garbage_bag", texUnit_counter % 32, 7, modelType.GARBAGE, i));
-                //else
-                //garbages.Add(new InteractiveModel("scattered_garbage", "scattered_garbage", (texUnit_counter + 1) % 32, 7, modelType.GARBAGE, i));
+                garbages.Add(new InteractiveModel("garbage_bag", "garbage_bag", texUnit_counter % 32, 3, modelType.GARBAGE, i));
 
-                int x = random.Next(0, (int)skyboxes[0].maxX);
-                int y = 0;
-                int z = random.Next(0, (int)skyboxes[0].maxZ);
-                vec3 pos = new vec3(x, y, z);
-                garbages[i].Scale(.6f, .6f, .6f);
+                garbages[i].Scale(.5f, .5f, .5f);
+                float x = garbagePos[i].x;
+                float y = garbagePos[i].y;
+                float z = garbagePos[i].z;
                 garbages[i].Translate(x, y, z);
-                boundingBoxes.Add(getBoundingBox(new vec3(x, y, z), garbages[i].obj));
-                //garbageBag = !garbageBag;
+                setCollisionBoundingBox(new vec3(x, y, z), garbages[i].obj);
+                Models_Interactive.Add(garbages[i]);
             }
             texUnit_counter += 1;
             key_garbageID = random.Next(0, numOfGarbages);
@@ -433,7 +455,8 @@ namespace Graphics
             radio = new InteractiveModel("radio", "radio", texUnit_counter % 32, 8, modelType.RADIO, 0);
             texUnit_counter++;
             radio.Translate(15, 30, 150);
-            boundingBoxes.Add(getBoundingBox(new vec3(15, 30, 150), radio.obj));
+            setCollisionBoundingBox(new vec3(15, 30, 150), radio.obj);
+            Models_Interactive.Add(radio);
             #endregion
 
             #endregion
@@ -445,6 +468,7 @@ namespace Graphics
 
         //Not working
         //dunno what to do :)
+        //didn't add COLLISION BOUNDING BOXES HERE CUZ IDK IF WE'LL USE THIS FUNC
         #region
         public void LoadSkyboxModels()
         {
@@ -464,23 +488,24 @@ namespace Graphics
                 case skyboxType.FOREST:
                     #region Garbages initialization
                     garbages = new List<InteractiveModel>();
-                    numOfGarbages = random.Next(2, 7);
-                    bool garbageBag = true;
-                    for (int i = 0; i < numOfGarbages; i++)
-                    {
-                        //if (garbageBag)
+                    List<vec3> garbagePos = new List<vec3>{
+                        new vec3(700, 0, 630),
+                        new vec3(650, 0, 630),
+                        new vec3(630, 0, 515),
+                        new vec3(630, 0, 495),
+                        new vec3(560, 0, 450)
+                    };
+                    numOfGarbages = garbagePos.Count;
+                    for (int i = 0; i < numOfGarbages; i++) {
                         garbages.Add(new InteractiveModel("garbage_bag", "garbage_bag", texUnit_counter % 32, 7, modelType.GARBAGE, i));
-                        //else
-                        //garbages.Add(new InteractiveModel("scattered_garbage", "scattered_garbage", (texUnit_counter + 1) % 32, 7, modelType.GARBAGE, i));
 
-                        int x = random.Next(0, (int)skyboxes[0].maxX);
-                        int y = 0;
-                        int z = random.Next(0, (int)skyboxes[0].maxZ);
-                        vec3 pos = new vec3(x, y, z);
-                        garbages[i].Scale(.6f, .6f, .6f);
+                        garbages[i].Scale(.5f, .5f, .5f);
+                        float x = garbagePos[i].x;
+                        float y = garbagePos[i].y;
+                        float z = garbagePos[i].z;
                         garbages[i].Translate(x, y, z);
-
-                        //garbageBag = !garbageBag;
+                        setCollisionBoundingBox(new vec3(x, y, z), garbages[i].obj);
+                        Models_Interactive.Add(garbages[i]);
                     }
                     texUnit_counter += 1;
                     key_garbageID = random.Next(0, numOfGarbages);
@@ -687,12 +712,12 @@ namespace Graphics
         {
             #region Doors
             for (int i = 0; i < doors.Count; i++)
-                doors[i].isDrawn = false;
+                doors[i].obj.isDrawn = false;
             #endregion
 
             #region Garbages
             for (int i = 0; i < numOfGarbages; i++)
-                garbages[i].isDrawn = false;
+                garbages[i].obj.isDrawn = false;
             #endregion
         }
 
@@ -721,7 +746,7 @@ namespace Graphics
 
                 #region 3D Models drawing
                 //watchtower.Draw(transID);
-                //house_obj.Draw(transID);
+                house_obj.Draw(transID);
                 car.Draw(transID);
                 phone.Draw(transID);
                 doors[0].Draw(transID);
@@ -822,17 +847,34 @@ namespace Graphics
         {
             float DistanceX, DistanceY, DistanceZ;
 
+            for(int i = 0; i < Models_Interactive.Count; i++) {
+                if (!Models_Interactive[i].obj.isDrawn)
+                    continue;
+                DistanceX = Math.Abs(cam.mPosition.x - Models_Interactive[i].obj.position.x);
+                DistanceY = Math.Abs(cam.mPosition.y - Models_Interactive[i].obj.position.y);
+                DistanceZ = Math.Abs(cam.mPosition.z - Models_Interactive[i].obj.position.z);
+                if (DistanceX < Models_Interactive[i].interactionBB.x / 2
+                 && DistanceY < Models_Interactive[i].interactionBB.y / 2
+                 && DistanceZ < Models_Interactive[i].interactionBB.z / 2) {
+                    Models_Interactive[i].Event();
+                    return Models_Interactive[i].type;
+                }
+            }
+            return modelType.NULL;
+
+            #region Old Code
+            /*
             #region Doors
             for (int i = 0; i < doors.Count; i++)
             {
-                if (!doors[i].isDrawn)
+                if (!doors[i].obj.isDrawn)
                     continue;
                 DistanceX = Math.Abs(cam.mPosition.x - doors[i].position.x);
                 DistanceY = Math.Abs(cam.mPosition.y - doors[i].position.y);
                 DistanceZ = Math.Abs(cam.mPosition.z - doors[i].position.z);
-                if (DistanceX < doors[i].interactionBoundingBox.x / 2
-                 && DistanceY < doors[i].interactionBoundingBox.y / 2
-                 && DistanceZ < doors[i].interactionBoundingBox.z / 2)
+                if (DistanceX < doors[i].interactionBB.x / 2
+                 && DistanceY < doors[i].interactionBB.y / 2
+                 && DistanceZ < doors[i].interactionBB.z / 2)
                 {
                     doors[i].Event();
                     return modelType.DOOR;
@@ -843,14 +885,14 @@ namespace Graphics
             #region Garbages
             for (int i = 0; i < numOfGarbages; i++)
             {
-                if (!garbages[i].isDrawn)
+                if (!garbages[i].obj.isDrawn)
                     continue;
                 DistanceX = Math.Abs(cam.mPosition.x - garbages[i].position.x);
                 DistanceY = Math.Abs(cam.mPosition.y - garbages[i].position.y);
                 DistanceZ = Math.Abs(cam.mPosition.z - garbages[i].position.z);
-                if (DistanceX < garbages[i].interactionBoundingBox.x / 2
-                  && DistanceY < garbages[i].interactionBoundingBox.y / 2
-                  && DistanceZ < garbages[i].interactionBoundingBox.z / 2)
+                if (DistanceX < garbages[i].interactionBB.x / 2
+                  && DistanceY < garbages[i].interactionBB.y / 2
+                  && DistanceZ < garbages[i].interactionBB.z / 2)
                 {
                     garbages[i].Event();
                     return modelType.GARBAGE;
@@ -862,18 +904,19 @@ namespace Graphics
             DistanceX = Math.Abs(cam.mPosition.x - radio.position.x);
             DistanceY = Math.Abs(cam.mPosition.y - radio.position.y);
             DistanceZ = Math.Abs(cam.mPosition.z - radio.position.z);
-            if (DistanceX  < radio.interactionBoundingBox.x / 2
-              && DistanceY < radio.interactionBoundingBox.y / 2
-              && DistanceZ < radio.interactionBoundingBox.z / 2)
+            if (DistanceX  < radio.interactionBB.x / 2
+              && DistanceY < radio.interactionBB.y / 2
+              && DistanceZ < radio.interactionBB.z / 2)
             {
                 radio.Event();
                 return modelType.RADIO;
             }
             #endregion
 
-            return modelType.NULL;
+            return modelType.NULL;*/
+            #endregion
         }
-        public void getBoundingBox(vec3 objPosition, Model3D modelObj)
+        public void setCollisionBoundingBox(vec3 objPosition, Model3D modelObj)
         {
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
@@ -890,11 +933,10 @@ namespace Graphics
                     minDepth = Math.Min(minDepth, v.z);
                     maxDepth = Math.Max(maxDepth, v.z);
                 }
-            modelObj.CollisionboundingBox.x = (maxWidth - minWidth);
-            modelObj.CollisionboundingBox.y = (maxHeight - minHeight);
-            modelObj.CollisionboundingBox.z = (maxDepth - minDepth);
+            modelObj.collisionBB.x = (maxWidth - minWidth);
+            modelObj.collisionBB.y = (maxHeight - minHeight);
+            modelObj.collisionBB.z = (maxDepth - minDepth);
             modelObj.position = objPosition;
-            modelObj.isDrawn = false;
         }
     }
 }

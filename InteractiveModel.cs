@@ -27,14 +27,14 @@ namespace Graphics
         public Model3D obj;
         public float range;
         public vec3 position;
-        public vec3 interactionBoundingBox; //x: width, y: height, z: depth
+        public vec3 interactionBB; //x: width, y: height, z: depth
         public modelType type;
         public int objID;
-        public Boolean isDrawn;
         public static bool radio_ON = false; // for the interaction with the radio
         System.Media.SoundPlayer radio_sound = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\radio-recording.wav");
         System.Media.SoundPlayer player;
         vec3 old_scaling = new vec3(1, 1, 1);
+
         public InteractiveModel(String folderName, String modelName, int texUnit, float rangeOfInteraction, modelType t, int ID)
         {
             obj = new Model3D();
@@ -43,9 +43,8 @@ namespace Graphics
             range = rangeOfInteraction;
             type = t;
             objID = ID;
-            isDrawn = false;
-            #region BoundingBox intialization
-            interactionBoundingBox = new vec3();
+            #region Interaction BoundingBox intialization
+            interactionBB = new vec3();
 
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
@@ -62,19 +61,19 @@ namespace Graphics
                     minDepth = Math.Min(minDepth, v.z);
                     maxDepth = Math.Max(maxDepth, v.z);
                 }
-            interactionBoundingBox.x = range * (maxWidth - minWidth);
-            interactionBoundingBox.y = range * (maxHeight - minHeight);
-            interactionBoundingBox.z = range * (maxDepth - minDepth);
+            interactionBB.x = range * (maxWidth - minWidth);
+            interactionBB.y = range * (maxHeight - minHeight);
+            interactionBB.z = range * (maxDepth - minDepth);
             #endregion
         }
 
         public void Scale(float x, float y, float z)
         {
             obj.scalematrix = glm.scale(new mat4(1), new vec3(x, y, z));
-            interactionBoundingBox.x /= old_scaling.x;
-            interactionBoundingBox.y /= old_scaling.y;
-            interactionBoundingBox.z /= old_scaling.z;
-            interactionBoundingBox *= new vec3(x, y, z);
+            interactionBB.x /= old_scaling.x;
+            interactionBB.y /= old_scaling.y;
+            interactionBB.z /= old_scaling.z;
+            interactionBB *= new vec3(x, y, z);
             old_scaling = new vec3(x, y, z);
         }
 
@@ -92,7 +91,6 @@ namespace Graphics
         public void Draw(int matID)
         {
             obj.Draw(matID);
-            isDrawn = true;
         }
 
         public void Event()
@@ -217,23 +215,28 @@ namespace Graphics
                     Renderer.cam.Reset(95, 50, 280, 20, 20, 150, 0, 1, 0);
                     break;
             }
-            player = new System.Media.SoundPlayer(Renderer.projectPath+@"\Sounds\door open with a squeak.wav");
-            player.Play();
-            Thread.Sleep(2948);
-            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
-            player.Play();
+            #region SFX
+            //player = new System.Media.SoundPlayer(Renderer.projectPath+@"\Sounds\door open with a squeak.wav");
+            //player.Play();
+            //Thread.Sleep(2948);
+            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
+            //player.Play();
+            #endregion
         }
 
         public void GARBAGE_Event()
         {
-            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\light_plasticbag_search.wav");
-            player.Play();
-            Thread.Sleep(17500);
+            #region SFX
+            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\light_plasticbag_search.wav");
+            //player.Play();
+            //Thread.Sleep(17500);
+            #endregion
+
             if (objID == Renderer.key_garbageID)
             {
                 Renderer.playerHasKey = true;
                 player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\keys.wav");
-                player.Play();
+                //player.Play();
             }
         }
 
@@ -247,16 +250,16 @@ namespace Graphics
             //recharge the light intensity?
 
             //when the light ison
-            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\LightOn.wav");
-            player.Play();
+            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\LightOn.wav");
+            //player.Play();
 
             //when light is about to pop
-            MP3_player bulb = new MP3_player();
-            bulb.open(Renderer.projectPath + @"\Sounds\light_plasticbag_search.mp3");
-            bulb.play();
-            Thread.Sleep(2980);
-            bulb.open(Renderer.projectPath + @"\Sounds\light-bulb-pop.mp3");
-            bulb.play();
+            //MP3_player bulb = new MP3_player();
+            //bulb.open(Renderer.projectPath + @"\Sounds\light_plasticbag_search.mp3");
+            //bulb.play();
+            //Thread.Sleep(2980);
+            //bulb.open(Renderer.projectPath + @"\Sounds\light-bulb-pop.mp3");
+            //bulb.play();
         }
 
         public void PILLS_Event()
@@ -264,13 +267,13 @@ namespace Graphics
             //refill the sanity bar
 
             //check to see if the bottle is full or not
-            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\shaking-pill-bottle.wav");
-            player.Play();
+            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\shaking-pill-bottle.wav");
+            //player.Play();
             //actual size 3779
-            Thread.Sleep(3500);
+            //Thread.Sleep(3500);
             //take a pill
-            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\taking-pills.wav");
-            player.Play();
+            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\taking-pills.wav");
+            //player.Play();
         }
 
         public void RADIO_Event()

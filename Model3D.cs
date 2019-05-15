@@ -31,7 +31,7 @@ namespace Graphics
 
         Dictionary<int, Texture> textures;
 
-        public vec3 collisionBB;   //x: width, y: height, z: depth
+        public vec3 CollisionboundingBox;   //x: width, y: height, z: depth
         public vec3 position;     //center point for the transformation operations
         public Boolean isDrawn;
 
@@ -50,7 +50,6 @@ namespace Graphics
             var assimpNetimporter = new Assimp.AssimpContext();
             assimpNetScene = assimpNetimporter.ImportFile(path + "\\" + fileName);
             Initialize(texUnit);
-            isDrawn = false;
         }
 
         void Initialize(int texUnit)
@@ -79,8 +78,7 @@ namespace Graphics
                     if (netMaterials[i].HasTextureDiffuse)
                     {
                         //tex = new Texture(netMaterials[i].TextureDiffuse.FilePath, texUnit, true);
-                        if (netMaterials[i].TextureDiffuse.FilePath.Substring(0, 2) == "C:" ||
-                            netMaterials[i].TextureDiffuse.FilePath.Substring(0, 2) == "X:")
+                        if (netMaterials[i].TextureDiffuse.FilePath.Substring(0, 2) == "C:")
                         {
                             string filename = Path.GetFileName(netMaterials[i].TextureDiffuse.FilePath);
                             texturesPath.Add(RootPath + "\\" + filename);
@@ -247,7 +245,6 @@ namespace Graphics
                 meshes[i].Draw(matID, scalematrix, rotmatrix, transmatrix);
                 Gl.glDisable(Gl.GL_BLEND);
             }
-
             isDrawn = true;
         }
     }

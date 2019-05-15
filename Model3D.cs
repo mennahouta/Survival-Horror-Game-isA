@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +30,10 @@ namespace Graphics
         public int hasTex = 0;
 
         Dictionary<int, Texture> textures;
+
+        public vec3 CollisionboundingBox;   //x: width, y: height, z: depth
+        public vec3 position;     //center point for the transformation operations
+        public Boolean isDrawn;
 
         string RootPath;
         public Model3D()

@@ -127,7 +127,6 @@ namespace Graphics
             result += mPosition;
 
             result.y /= 2;
-
             for (int i = 0; i < Renderer.Models_3D.Count; i++)
             {
                 if (!Renderer.Models_3D[i].isDrawn)
@@ -135,20 +134,21 @@ namespace Graphics
                 DistanceX = Math.Abs(result.x - Renderer.Models_3D[i].position.x);
                 DistanceY = Math.Abs(result.y - Renderer.Models_3D[i].position.y);
                 DistanceZ = Math.Abs(result.z - Renderer.Models_3D[i].position.z);
-                if (DistanceX < (PersonBoundingBox.x + Renderer.Models_3D[i].collisionBB.x) / 2
-                 && DistanceY < (PersonBoundingBox.y + Renderer.Models_3D[i].collisionBB.y) / 2
-                 && DistanceZ < (PersonBoundingBox.z + Renderer.Models_3D[i].collisionBB.z) / 2)
+                if (DistanceX < (PersonBoundingBox.x + Renderer.Models_3D[i].CollisionboundingBox.x) / 2
+                 && DistanceY < (PersonBoundingBox.y + Renderer.Models_3D[i].CollisionboundingBox.y) / 2
+                 && DistanceZ < (PersonBoundingBox.z + Renderer.Models_3D[i].CollisionboundingBox.z) / 2)
                     return false;
             }
-            for (int i = 0; i < Renderer.Models_Interactive.Count; i++) {
-                if (!Renderer.Models_Interactive[i].obj.isDrawn)
-                    continue;
-                DistanceX = Math.Abs(result.x - Renderer.Models_Interactive[i].obj.position.x);
-                DistanceY = Math.Abs(result.y - Renderer.Models_Interactive[i].obj.position.y);
-                DistanceZ = Math.Abs(result.z - Renderer.Models_Interactive[i].obj.position.z);
-                if (DistanceX < (PersonBoundingBox.x + Renderer.Models_Interactive[i].obj.collisionBB.x) / 2
-                 && DistanceY < (PersonBoundingBox.y + Renderer.Models_Interactive[i].obj.collisionBB.y) / 2
-                 && DistanceZ < (PersonBoundingBox.z + Renderer.Models_Interactive[i].obj.collisionBB.z) / 2)
+            for (int i = 0; i < Renderer.Models_Interactive.Count; i++)
+            {
+                if (!Renderer.Models_Interactive[i].isDrawn)
+                  continue;
+                DistanceX = Math.Abs(result.x - Renderer.Models_Interactive[i].position.x);
+                DistanceY = Math.Abs(result.y - Renderer.Models_Interactive[i].position.y);
+                DistanceZ = Math.Abs(result.z - Renderer.Models_Interactive[i].position.z);
+                if (DistanceX < (PersonBoundingBox.x + Renderer.Models_Interactive[i].obj.CollisionboundingBox.x) / 2
+                 && DistanceY < (PersonBoundingBox.y + Renderer.Models_Interactive[i].obj.CollisionboundingBox.y) / 2
+                 && DistanceZ < (PersonBoundingBox.z + Renderer.Models_Interactive[i].obj.CollisionboundingBox.z) / 2)
                     return false;
             }
             return true;

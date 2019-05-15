@@ -7,25 +7,23 @@ using GlmNet;
 using Tao.OpenGl;
 using System.IO;
 
-namespace Graphics
-{
-    class Skybox
-    {
+namespace Graphics {
+    class Skybox {
         Model up, down, right, left, back, front;
         Texture texUp, texDown, texRight, texLeft, texBack, texFront;
         public float maxX, maxY, maxZ;
 
-        public Skybox(float maxX, float maxY, float maxZ, List<String>TEX) {
+        public Skybox(float maxX, float maxY, float maxZ, List<String> TEX) {
             this.maxX = maxX;
             this.maxY = maxY;
             this.maxZ = maxZ;
 
             #region Skybox Textures
-            texUp    = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[0], 0);
-            texDown  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[1], 0);
+            texUp = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[0], 0);
+            texDown = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[1], 0);
             texRight = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[2], 0);
-            texLeft  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[3], 0);
-            texBack  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[4], 0);
+            texLeft = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[3], 0);
+            texBack = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[4], 0);
             texFront = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[5], 0);
             #endregion
 
@@ -174,7 +172,7 @@ namespace Graphics
             front.vertices.Add(v4);
             front.vertices.Add(v5);
             front.vertices.Add(v6);
-            
+
             front.texture = texFront;
             front.uvCoordinates.Add(new vec2(0, 1));
             front.uvCoordinates.Add(new vec2(1, 0));
@@ -193,8 +191,7 @@ namespace Graphics
             #endregion
         }
 
-        public void Draw(int matID)
-        {
+        public void Draw(int matID) {
             down.Draw(matID);
             back.Draw(matID);
             up.Draw(matID);

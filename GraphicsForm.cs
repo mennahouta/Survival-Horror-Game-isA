@@ -6,10 +6,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-namespace Graphics
-{
-    public partial class GraphicsForm : Form
-    {
+namespace Graphics {
+    public partial class GraphicsForm : Form {
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
 
@@ -17,14 +15,12 @@ namespace Graphics
             "You have found the key, I'm impressed!",
             "Garbage. Garbage everywhere.",
             "Nothing of use here.",
-            "Why are you checking other people's garbage? *suspicious eyes*",
             "People can be very messy.",
             "You're going to be very smelly."
         };
 
         float deltaTime;
-        public GraphicsForm()
-        {
+        public GraphicsForm() {
             InitializeComponent();
             #region Full-Screen
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -45,17 +41,13 @@ namespace Graphics
             MainLoopThread.Start();
             #endregion
         }
-        void initialize()
-        {
-            InteractiveModel.radio_sound.open(@"B:\Uni\Year3.2\Graphics\Project\Graphics\tst.mp3");
-            renderer.Initialize();   
+        void initialize() {
+            //InteractiveModel.radio_sound.open(Renderer.projectPath + "tst.mp3");
+            renderer.Initialize();
         }
-        void MainLoop()
-        {
-            while (true)
-            {
-                try
-                {
+        void MainLoop() {
+            while (true) {
+                try {
                     renderer.Flush_Existing_IOBJ();
                     renderer.Draw();
                     renderer.Update(deltaTime);
@@ -64,27 +56,22 @@ namespace Graphics
                 simpleOpenGlControl1.Refresh();
             }
         }
-        private void GraphicsForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
+        private void GraphicsForm_FormClosing(object sender, FormClosingEventArgs e) {
             renderer.CleanUp();
             MainLoopThread.Abort();
         }
 
-        private void simpleOpenGlControl1_Paint(object sender, PaintEventArgs e)
-        {
-            try
-            {
+        private void simpleOpenGlControl1_Paint(object sender, PaintEventArgs e) {
+            try {
                 renderer.Draw();
                 renderer.Update(deltaTime);
             }
             catch { }
         }
 
-        private void simpleOpenGlControl1_KeyPress(object sender, KeyPressEventArgs e)
-        {
+        private void simpleOpenGlControl1_KeyPress(object sender, KeyPressEventArgs e) {
             //Exit Application
-            if (e.KeyChar == (char)(27))
-            {
+            if (e.KeyChar == (char)(27)) {
                 renderer.CleanUp();
                 MainLoopThread.Abort();
                 this.Close();
@@ -103,19 +90,15 @@ namespace Graphics
                 Renderer.cam.Fly(-speed);
             if (e.KeyChar == 'c')
                 Renderer.cam.Fly(speed);
-            if (e.KeyChar == 'e')
-            {
-                try
-                {
+            if (e.KeyChar == 'e') {
+                try {
                     modelType currentInteractionType = renderer.InteractiveCheck();
 
                     #region Garbage interaction
-                    if (currentInteractionType == modelType.GARBAGE)
-                    {
+                    if (currentInteractionType == modelType.GARBAGE) {
                         if (Renderer.playerHasKey)
                             MessageBox.Show(garbageMessages[0]);
-                        else
-                        {
+                        else {
                             Random random = new Random();
                             MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
                         }
@@ -129,8 +112,7 @@ namespace Graphics
         }
 
         float prevX, prevY;
-        private void simpleOpenGlControl1_MouseMove(object sender, MouseEventArgs e)
-        {
+        private void simpleOpenGlControl1_MouseMove(object sender, MouseEventArgs e) {
             float speed = 0.05f;
             float delta = e.X - prevX;
             if (delta > 2)
@@ -148,18 +130,16 @@ namespace Graphics
             MoveCursor();
         }
 
-        private void MoveCursor()
-        {
+        private void MoveCursor() {
             this.Cursor = new Cursor(Cursor.Current.Handle);
             Point p = PointToScreen(simpleOpenGlControl1.Location);
-            Cursor.Position = new Point(simpleOpenGlControl1.Size.Width/2+p.X, simpleOpenGlControl1.Size.Height/2+p.Y);
+            Cursor.Position = new Point(simpleOpenGlControl1.Size.Width / 2 + p.X, simpleOpenGlControl1.Size.Height / 2 + p.Y);
             Cursor.Clip = new Rectangle(this.Location, this.Size);
-            prevX = simpleOpenGlControl1.Location.X+simpleOpenGlControl1.Size.Width/2;
+            prevX = simpleOpenGlControl1.Location.X + simpleOpenGlControl1.Size.Width / 2;
             prevY = simpleOpenGlControl1.Location.Y + simpleOpenGlControl1.Size.Height / 2;
         }
 
-        public Rectangle GetScreen()
-        {
+        public Rectangle GetScreen() {
             return Screen.FromControl(this).Bounds;
         }
     }

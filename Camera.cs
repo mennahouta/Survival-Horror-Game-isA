@@ -19,6 +19,8 @@ namespace Graphics
         mat4 mProjectionMatrix;
         float PersonHeight;
         vec3 PersonBoundingBox = new vec3(0, 0, 0);
+        public static bool Move = false;
+
         public Camera()
         {
             Reset(0, 0, 5, 0, 0, 0, 0, 1, 0);
@@ -146,6 +148,7 @@ namespace Graphics
                 return;
             mPosition += dist * mDirection;
             mPosition.y = PersonHeight;
+            Move = true;
         }
         public void Strafe(float dist)
         {
@@ -153,6 +156,7 @@ namespace Graphics
                 return;
             mPosition += dist * mRight;
             mPosition.y = PersonHeight;
+            Move = true;
         }
         public void Fly(float dist)
         {
@@ -160,6 +164,7 @@ namespace Graphics
                 return;
             mPosition += dist * mUp;
             mPosition.y = PersonHeight;
+            Move = true;
         }
     }
 }

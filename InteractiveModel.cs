@@ -32,7 +32,7 @@ namespace Graphics
         public int objID;
         public Boolean isDrawn;
         public static bool radio_ON = false; // for the interaction with the radio
-        public static MP3_player radio_sound = new MP3_player();
+        System.Media.SoundPlayer radio_sound = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\radio-recording.wav");
         System.Media.SoundPlayer player;
         vec3 old_scaling = new vec3(1, 1, 1);
         public InteractiveModel(String folderName, String modelName, int texUnit, float rangeOfInteraction, modelType t, int ID)
@@ -217,17 +217,24 @@ namespace Graphics
                     Renderer.cam.Reset(95, 50, 280, 20, 20, 150, 0, 1, 0);
                     break;
             }
-            player = new System.Media.SoundPlayer(Renderer.projectPath+@"Sounds\door open with a squeak.wav");
+            player = new System.Media.SoundPlayer(Renderer.projectPath+@"\Sounds\door open with a squeak.wav");
             player.Play();
-            Thread.Sleep(2260);
-            player = new System.Media.SoundPlayer(Renderer.projectPath + @"Sounds\door close with a squeak.wav");
+            Thread.Sleep(2948);
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
             player.Play();
         }
 
         public void GARBAGE_Event()
         {
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\light_plasticbag_search.wav");
+            player.Play();
+            Thread.Sleep(17500);
             if (objID == Renderer.key_garbageID)
+            {
                 Renderer.playerHasKey = true;
+                player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\keys.wav");
+                player.Play();
+            }
         }
 
         public void BARRELS_Event()
@@ -238,11 +245,32 @@ namespace Graphics
         public void LIGHT_Event()
         {
             //recharge the light intensity?
+
+            //when the light ison
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\LightOn.wav");
+            player.Play();
+
+            //when light is about to pop
+            MP3_player bulb = new MP3_player();
+            bulb.open(Renderer.projectPath + @"\Sounds\light_plasticbag_search.mp3");
+            bulb.play();
+            Thread.Sleep(2980);
+            bulb.open(Renderer.projectPath + @"\Sounds\light-bulb-pop.mp3");
+            bulb.play();
         }
 
         public void PILLS_Event()
         {
             //refill the sanity bar
+
+            //check to see if the bottle is full or not
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\shaking-pill-bottle.wav");
+            player.Play();
+            //actual size 3779
+            Thread.Sleep(3500);
+            //take a pill
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\taking-pills.wav");
+            player.Play();
         }
 
         public void RADIO_Event()
@@ -251,12 +279,12 @@ namespace Graphics
             //the static noise
             if (radio_ON)
             {
-                radio_sound.stop();
+                radio_sound.Stop();
                 radio_ON = false;
             }
             else
             {
-                radio_sound.play();
+                radio_sound.PlayLooping();
                 radio_ON = true;
             }
         }

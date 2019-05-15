@@ -53,6 +53,9 @@ namespace Graphics
             down.uvCoordinates.Add(new vec2(0, 0));
             down.uvCoordinates.Add(new vec2(1, 0));
 
+            for (int i = 0; i < down.vertices.Count; i++)
+                down.normals.Add(new vec3(0, 1, 0));
+
             down.Initialize();
             #endregion
 
@@ -75,6 +78,9 @@ namespace Graphics
 
             up.transformationMatrix = glm.translate(new mat4(1), new vec3(0, maxY, 0));
 
+            for (int i = 0; i < up.vertices.Count; i++)
+                up.normals.Add(new vec3(0, -1, 0));
+
             up.Initialize();
             #endregion
 
@@ -96,6 +102,9 @@ namespace Graphics
             right.uvCoordinates.Add(new vec2(0, 1));
 
             right.transformationMatrix = glm.rotate(90.0f / 180.0f * 3.141592f, new vec3(0, 0, 1));
+
+            for (int i = 0; i < right.vertices.Count; i++)
+                right.normals.Add(new vec3(0, 0, -1));
 
             right.Initialize();
             #endregion
@@ -121,6 +130,9 @@ namespace Graphics
                 glm.rotate(90.0f / 180.0f * 3.141592f, new vec3(0, 0, 1)),
                 glm.translate(new mat4(1), new vec3(maxZ, 0, 0)) }
             );
+
+            for (int i = 0; i < left.vertices.Count; i++)
+                left.normals.Add(new vec3(0, 0, 1));
 
             left.Initialize();
             #endregion
@@ -148,6 +160,9 @@ namespace Graphics
             back.uvCoordinates.Add(new vec2(0, 0));
             back.uvCoordinates.Add(new vec2(1, 0));
 
+            for (int i = 0; i < back.vertices.Count; i++)
+                back.normals.Add(new vec3(-1, 0, 0));
+
             back.Initialize();
             #endregion
 
@@ -169,6 +184,9 @@ namespace Graphics
             front.uvCoordinates.Add(new vec2(0, 0));
 
             front.transformationMatrix = glm.translate(new mat4(1), new vec3(0, 0, -maxZ));
+
+            for (int i = 0; i < front.vertices.Count; i++)
+                front.normals.Add(new vec3(1, 0, 0));
 
             front.Initialize();
             #endregion

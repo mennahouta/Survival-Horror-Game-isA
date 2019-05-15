@@ -200,8 +200,8 @@ namespace Graphics
                     Translate(80, 0, 300);
                     break;
                 case 4:     //4: bathroom skybox
-                    Renderer.cam.Reset(80, 105, 280, 20, 20, 150, 0, 1, 0);
-                    Translate(80, 0, 300);
+                    Renderer.cam.Reset(80, 105, 190, 50, 50, 245, 0, 1, 0);
+                    Translate(80, 0, 200);
                     break;
                 case 5:     //5: closet skybox(has a trapdoor)
                     Renderer.cam.Reset(100, 105, 20, 20, 20, 150, 0, 1, 0);
@@ -215,7 +215,8 @@ namespace Graphics
 
         public void GARBAGE_Event()
         {
-            //Menna
+            if (objID == Renderer.key_garbageID)
+                Renderer.playerHasKey = true;
         }
 
         public void BARRELS_Event()
@@ -235,7 +236,18 @@ namespace Graphics
 
         public void RADIO_Event()
         {
-            //Esraa
+            //turn on or off
+            //the static noise ;\
+            if (radio_ON)
+            {
+                radio_sound.stop();
+                radio_ON = false;
+            }
+            else
+            {
+                radio_sound.play();
+                radio_ON = true;
+            }
         }
 
         public void TEXT_Event()

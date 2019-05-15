@@ -13,8 +13,15 @@ namespace Graphics
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
 
-		//Menna
-		
+        List<String> garbageMessages = new List<string>(){
+            "You have found the key, I'm impressed!",
+            "Garbage. Garbage everywhere.",
+            "Nothing of use here.",
+            "Why are you checking other people's garbage? *suspicious eyes*",
+            "People can be very messy.",
+            "You're going to be very smelly."
+        };
+
         float deltaTime;
         public GraphicsForm()
         {
@@ -40,16 +47,20 @@ namespace Graphics
         }
         void initialize()
         {
-			//Esraa
+            InteractiveModel.radio_sound.open(@"B:\Uni\Year3.2\Graphics\Project\Graphics\tst.mp3");
             renderer.Initialize();   
         }
         void MainLoop()
         {
             while (true)
             {
-                renderer.Flush_Existing_IOBJ();
-                renderer.Draw();
-                renderer.Update(deltaTime);
+                try
+                {
+                    renderer.Flush_Existing_IOBJ();
+                    renderer.Draw();
+                    renderer.Update(deltaTime);
+                }
+                catch { }
                 simpleOpenGlControl1.Refresh();
             }
         }
@@ -61,8 +72,12 @@ namespace Graphics
 
         private void simpleOpenGlControl1_Paint(object sender, PaintEventArgs e)
         {
-            renderer.Draw();
-            renderer.Update(deltaTime);
+            try
+            {
+                renderer.Draw();
+                renderer.Update(deltaTime);
+            }
+            catch { }
         }
 
         private void simpleOpenGlControl1_KeyPress(object sender, KeyPressEventArgs e)
@@ -90,11 +105,25 @@ namespace Graphics
                 Renderer.cam.Fly(speed);
             if (e.KeyChar == 'e')
             {
-                modelType currentInteractionType = renderer.InteractiveCheck();
-                
-                #region Garbage interaction
-				//Menna
-                #endregion
+                try
+                {
+                    modelType currentInteractionType = renderer.InteractiveCheck();
+
+                    #region Garbage interaction
+                    if (currentInteractionType == modelType.GARBAGE)
+                    {
+                        if (Renderer.playerHasKey)
+                            MessageBox.Show(garbageMessages[0]);
+                        else
+                        {
+                            Random random = new Random();
+                            MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
+                        }
+                    }
+                    #endregion
+
+                }
+                catch { }
             }
 
         }

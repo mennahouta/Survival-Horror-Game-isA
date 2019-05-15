@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -22,6 +22,12 @@ namespace Graphics
         public void play()
         {
             string command = "play MediaFile";
+            mciSendString(command, null, 0, 0);
+        }
+
+        public void PlayLooping()
+        {
+            string command = "play MediaFile REPEAT";
             mciSendString(command, null, 0, 0);
         }
 

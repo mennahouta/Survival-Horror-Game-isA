@@ -28,7 +28,7 @@ namespace Graphics
         public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
 
         #region Shaders declaration
-        Shader sh;
+        Shader sh, sh2D;
         #endregion
 
         #region Matricies declaration
@@ -84,7 +84,7 @@ namespace Graphics
 
         List<Boolean> PrevoiuslyLoaded;
         #region 3D Models declaration
-        Model3D car, phone, watchtower, house_obj;
+        Model3D car, watchtower, house_obj;
         List<Model3D> bedroomFurni;
         List<Model3D> livingFurni;
         List<Model3D> bathroomFurni;
@@ -95,7 +95,7 @@ namespace Graphics
         public static List<Skybox> skyboxes;
         public static int currentSkyboxID = 0; //FORREST
 
-        InteractiveModel radio;
+        InteractiveModel radio, phone;
 
         #region GARBAGE
         public static List<InteractiveModel> garbages;
@@ -136,16 +136,58 @@ namespace Graphics
 
         #endregion
 
+        public static bool drawText = false;
+        #region 2D Models declaration
+        Model obj2D;
+        List<Texture> chapter;
+        int modelMat2D_ID;
+        #endregion
+
         public void Initialize()
-        {   
+        {
             #region Shaders intialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
+            sh2D = new Shader(projectPath + "\\Shaders\\2Dvertex.vertexshader", projectPath + "\\Shaders\\2Dfrag.fragmentshader");
             #endregion
 
             Gl.glClearColor(0, 0, 0.4f, 1);
-            
+
             cam = new Camera();
             cam.Reset(180, 30, 800, 20, 20, 150, 0, 1, 0);
+
+            #region 2D Models intializtion
+            modelMat2D_ID = Gl.glGetUniformLocation(sh2D.ID, "model");
+            #region Text Obj
+            obj2D = new Model();
+            obj2D.vertices.Add(new vec3(-1, 1, 0));
+            obj2D.vertices.Add(new vec3(1, -1, 0));
+            obj2D.vertices.Add(new vec3(-1, -1, 0));
+            obj2D.vertices.Add(new vec3(1, 1, 0));
+            obj2D.vertices.Add(new vec3(-1, 1, 0));
+            obj2D.vertices.Add(new vec3(1, -1, 0));
+
+            obj2D.uvCoordinates.Add(new vec2(0, 0));
+            obj2D.uvCoordinates.Add(new vec2(1, 1));
+            obj2D.uvCoordinates.Add(new vec2(0, 1));
+            obj2D.uvCoordinates.Add(new vec2(1, 0));
+            obj2D.uvCoordinates.Add(new vec2(0, 0));
+            obj2D.uvCoordinates.Add(new vec2(1, 1));
+
+            obj2D.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
+                glm.scale(new mat4(1), new vec3(0.3f, 1f, 1)), //need to be updated with every skybox FML
+                glm.translate(new mat4(1), new vec3(0, 0, 0)) }
+            );
+            obj2D.Initialize();
+
+            chapter = new List<Texture>()
+            {
+                new Texture(projectPath + "\\Textures\\ch1.png", 31),
+                new Texture(projectPath + "\\Textures\\ch2.png", 30),
+                new Texture(projectPath + "\\Textures\\ch3.png", 29),
+            };
+            #endregion
+
+            #endregion
 
             #region Matricies intialization
             ProjectionMatrix = cam.GetProjectionMatrix();
@@ -161,7 +203,6 @@ namespace Graphics
             sh.UseShader();
 
             g_down = new Ground(2100, 2100, 2, 2);
-
 
             #region Skyboxes intialization
         
@@ -513,10 +554,10 @@ namespace Graphics
                     #endregion
 
                     #region Phone Model
-                    phone = new Model3D();
-                    phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
-                    phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
-                    phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 2, 800));
+                    phone = new InteractiveModel("phone", "iPhone 6", texUnit_counter % 32, 8, modelType.TEXT, 0);
+                    texUnit_counter++;
+                    phone.Scale(0.4f, 0.4f, 0.4f);
+                    phone.Translate(180, 2, 800);
                     #endregion
 
                     #region Grass Models
@@ -886,8 +927,22 @@ namespace Graphics
                 }
                 catch { }
             }
-            
+
+
+            Gl.glDisable(Gl.GL_DEPTH_TEST);
+            //use 2D shader
+            sh2D.UseShader();
+            //draw 2D square
+            if (currentSkyboxID == 0)
+                obj2D.texture = chapter[0];
+            else if (currentSkyboxID == 1)
+                obj2D.texture = chapter[1];
+            else
+                obj2D.texture = chapter[2];
+            obj2D.Draw(modelMat2D_ID);
+            Gl.glEnable(Gl.GL_DEPTH_TEST);
         }
+
         public void Update(float deltaTime)
         {
             cam.UpdateViewMatrix();

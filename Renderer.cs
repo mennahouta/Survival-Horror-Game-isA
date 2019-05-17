@@ -29,6 +29,14 @@ namespace Graphics
 
         #region Shaders declaration
         Shader sh;
+        Shader sh2D;
+        #endregion
+
+        #region Interactive text declaration
+        Model obj2D;
+        Texture ch1_phone;
+        Texture ch2_paper;
+        Texture ch3_paper;
         #endregion
 
         #region Matricies declaration
@@ -42,11 +50,13 @@ namespace Graphics
 
         public float Speed = 1;
 
+        public static bool drawText = false;
+
         Ground g_down;
 
         List<Boolean> PrevoiuslyLoaded;
         #region 3D Models declaration
-        Model3D car,  phone, watchtower, house_obj, kitchen;
+        Model3D car, watchtower, house_obj, kitchen;
         List<Model3D> bedroomFurni;
         List<Model3D> livingFurni;
 
@@ -54,7 +64,7 @@ namespace Graphics
         public static List<Skybox> skyboxes;
         public static int currentSkyboxID = 0; //FORREST
 
-        InteractiveModel radio;
+        InteractiveModel radio, phone;
 
         #region GARBAGE
         public static List<InteractiveModel> garbages;
@@ -101,8 +111,35 @@ namespace Graphics
         #endregion
         public void Initialize()
         {   
-            #region Shaders intialization
+            #region Shaders initialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
+            sh2D = new Shader(projectPath + "\\Shaders\\2Dvertex.vertexshader", projectPath + "\\Shaders\\2Dfrag.fragmentshader");
+            #endregion
+
+            #region Interactive text initialization
+            ch1_phone = new Texture(projectPath + "\\Textures\\ch1.png", 20);
+            ch2_paper = new Texture(projectPath + "\\Textures\\ch2.png", 21);
+            ch3_paper = new Texture(projectPath + "\\Textures\\ch3.png", 22);
+
+            obj2D = new Model();
+            obj2D.vertices.Add(new vec3(-1, 1, 0));
+            obj2D.vertices.Add(new vec3(1, -1, 0));
+            obj2D.vertices.Add(new vec3(-1, -1, 0));
+            obj2D.vertices.Add(new vec3(1, 1, 0));
+            obj2D.vertices.Add(new vec3(-1, 1, 0));
+            obj2D.vertices.Add(new vec3(1, -1, 0));
+
+            obj2D.uvCoordinates.Add(new vec2(0, 0));
+            obj2D.uvCoordinates.Add(new vec2(1, 1));
+            obj2D.uvCoordinates.Add(new vec2(0, 1));
+            obj2D.uvCoordinates.Add(new vec2(1, 0));
+            obj2D.uvCoordinates.Add(new vec2(0, 0));
+            obj2D.uvCoordinates.Add(new vec2(1, 1));
+
+            obj2D.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
+                glm.scale(new mat4(1), new vec3(1f, 1f, 1)),
+                glm.translate(new mat4(1), new vec3(1.5f, 1f, 0)) }
+            );
             #endregion
 
             Gl.glClearColor(0, 0, 0.4f, 1);
@@ -121,7 +158,7 @@ namespace Graphics
             modelmatrix = glm.scale(new mat4(1), new vec3(50, 50, 50));
             #endregion
 
-            sh.UseShader();
+            //sh.UseShader();
 
             g_down = new Ground(2100, 2100, 2, 2);
 
@@ -316,19 +353,19 @@ namespace Graphics
             #endregion
 
             #region house
-            //house_obj = new Model3D();
-            //house_obj.LoadFile(projectPath + "\\ModelFiles\\house_obj", 7, "house-low-rus-obj.obj");
-            //house_obj.scalematrix = glm.scale(new mat4(1), new vec3(.5f, .5f, .5f));
-            //house_obj.transmatrix = glm.translate(new mat4(1), new vec3(700, 0, 500));
-            //getBoundingBox(new vec3(700, 0, 500), house_obj);
-            //Models_3D.Add(house_obj);
+            house_obj = new Model3D();
+            house_obj.LoadFile(projectPath + "\\ModelFiles\\house_obj", 7, "house-low-rus-obj.obj");
+            house_obj.scalematrix = glm.scale(new mat4(1), new vec3(.5f, .5f, .5f));
+            house_obj.transmatrix = glm.translate(new mat4(1), new vec3(700, 0, 500));
+            getBoundingBox(new vec3(700, 0, 500), house_obj);
+            Models_3D.Add(house_obj);
             #endregion
 
             #region Phone Model
-            phone = new Model3D();
-            phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
-            phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
-            phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 2, 800));
+            phone = new InteractiveModel("phone", "phone", texUnit_counter % 32, 8, modelType.TEXT, 0);
+            texUnit_counter++;
+            phone.Scale(0.4f, 0.4f, 0.4f);
+            phone.Translate(180, 2, 800);
             //getBoundingBox(new vec3(180, 2, 800), phone);
             //Models_3D.Add(phone);
             #endregion
@@ -450,6 +487,26 @@ namespace Graphics
             Gl.glDepthFunc(Gl.GL_LESS);
         }
 
+        public void DrawTextMessage(int id)
+        {
+            //2D controls
+            //disable depthtest (no z value in 2D)
+            Gl.glDisable(Gl.GL_DEPTH_TEST);
+            //use 2D shader
+            sh2D.UseShader();
+            //draw 2D square
+            Gl.glBindBuffer(Gl.GL_ARRAY_BUFFER, text_objID);
+            Gl.glEnableVertexAttribArray(0);
+            Gl.glVertexAttribPointer(0, 3, Gl.GL_FLOAT, Gl.GL_FALSE, 5 * sizeof(float), (IntPtr)0);
+            Gl.glEnableVertexAttribArray(1);
+            Gl.glVertexAttribPointer(1, 2, Gl.GL_FLOAT, Gl.GL_FALSE, 5 * sizeof(float), (IntPtr)(3 * sizeof(float)));
+            if (id == 1)
+                ch1_phone.Bind();
+            else if (id == 2)
+                ch2_paper.Bind();
+            else
+                ch3_paper.Bind();
+        }
 
         //Not working
         //dunno what to do :)
@@ -516,10 +573,10 @@ namespace Graphics
                     #endregion
 
                     #region Phone Model
-                    phone = new Model3D();
-                    phone.LoadFile(projectPath + "\\ModelFiles\\phone", 1, "iPhone 6.obj");
-                    phone.scalematrix = glm.scale(new mat4(1), new vec3(0.4f, 0.4f, 0.4f));
-                    phone.transmatrix = glm.translate(new mat4(1), new vec3(180, 2, 800));
+                    phone = new InteractiveModel("phone", "phone", texUnit_counter % 32, 8, modelType.TEXT, 0);
+                    texUnit_counter++;
+                    phone.Scale(0.4f, 0.4f, 0.4f);
+                    phone.Translate(180, 2, 800);
                     #endregion
 
                     #region Grass Models
@@ -729,7 +786,7 @@ namespace Graphics
 
                 #region 3D Models drawing
                 //watchtower.Draw(transID);
-                //house_obj.Draw(transID);
+                house_obj.Draw(transID);
                 car.Draw(transID);
                 phone.Draw(transID);
                 doors[0].Draw(transID);
@@ -806,7 +863,18 @@ namespace Graphics
                 //doors[i].Draw(transID);
             }
             #endregion
-            
+
+            if (drawText)
+            {
+                drawText = false;
+                if (currentSkyboxID == 0)
+                    DrawTextMessage(1);
+                else if (currentSkyboxID == 1)
+                    DrawTextMessage(2);
+                else
+                    DrawTextMessage(3);
+            }
+
         }
         public void Update(float deltaTime)
         {
@@ -876,6 +944,19 @@ namespace Graphics
             {
                 radio.Event();
                 return modelType.RADIO;
+            }
+            #endregion
+
+            #region phone check
+            DistanceX = Math.Abs(cam.mPosition.x - phone.position.x);
+            DistanceY = Math.Abs(cam.mPosition.y - phone.position.y);
+            DistanceZ = Math.Abs(cam.mPosition.z - phone.position.z);
+            if (DistanceX  < phone.interactionBoundingBox.x / 2
+              && DistanceY < phone.interactionBoundingBox.y / 2
+              && DistanceZ < phone.interactionBoundingBox.z / 2)
+            {
+                phone.Event();
+                return modelType.TEXT;
             }
             #endregion
 

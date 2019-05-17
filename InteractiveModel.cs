@@ -28,7 +28,7 @@ namespace Graphics
         public float range;
         public vec3 position;
         public Boolean isDrawn;
-        public vec3 interactionBB; //x: width, y: height, z: depth
+        public vec3 interactionBoundingBox; //x: width, y: height, z: depth
         public modelType type;
         public int objID;
         public static bool radio_ON = false; // for the interaction with the radio
@@ -47,7 +47,7 @@ namespace Graphics
             isDrawn = false;
 
             #region Interaction BoundingBox intialization
-            interactionBB = new vec3();
+            interactionBoundingBox = new vec3();
 
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
@@ -64,19 +64,19 @@ namespace Graphics
                     minDepth = Math.Min(minDepth, v.z);
                     maxDepth = Math.Max(maxDepth, v.z);
                 }
-            interactionBB.x = range * (maxWidth - minWidth);
-            interactionBB.y = range * (maxHeight - minHeight);
-            interactionBB.z = range * (maxDepth - minDepth);
+            interactionBoundingBox.x = range * (maxWidth - minWidth);
+            interactionBoundingBox.y = range * (maxHeight - minHeight);
+            interactionBoundingBox.z = range * (maxDepth - minDepth);
             #endregion
         }
 
         public void Scale(float x, float y, float z)
         {
             obj.scalematrix = glm.scale(new mat4(1), new vec3(x, y, z));
-            interactionBB.x /= old_scaling.x;
-            interactionBB.y /= old_scaling.y;
-            interactionBB.z /= old_scaling.z;
-            interactionBB *= new vec3(x, y, z);
+            interactionBoundingBox.x /= old_scaling.x;
+            interactionBoundingBox.y /= old_scaling.y;
+            interactionBoundingBox.z /= old_scaling.z;
+            interactionBoundingBox *= new vec3(x, y, z);
             old_scaling = new vec3(x, y, z);
         }
 

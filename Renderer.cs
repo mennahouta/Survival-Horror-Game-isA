@@ -815,9 +815,9 @@ namespace Graphics
                 DistanceX = Math.Abs(cam.mPosition.x - Models_Interactive[i].position.x);
                 DistanceY = Math.Abs(cam.mPosition.y - Models_Interactive[i].position.y);
                 DistanceZ = Math.Abs(cam.mPosition.z - Models_Interactive[i].position.z);
-                if (DistanceX < Models_Interactive[i].interactionBB.x / 2
-                 && DistanceY < Models_Interactive[i].interactionBB.y / 2
-                 && DistanceZ < Models_Interactive[i].interactionBB.z / 2) {
+                if (DistanceX < Models_Interactive[i].interactionBoundingBox.x / 2
+                 && DistanceY < Models_Interactive[i].interactionBoundingBox.y / 2
+                 && DistanceZ < Models_Interactive[i].interactionBoundingBox.z / 2) {
                     Models_Interactive[i].Event();
                     return Models_Interactive[i].type;
                 }
@@ -890,9 +890,9 @@ namespace Graphics
                     minDepth = Math.Min(minDepth, v.z);
                     maxDepth = Math.Max(maxDepth, v.z);
                 }
-            modelObj.collisionBB.x = (maxWidth - minWidth);
-            modelObj.collisionBB.y = (maxHeight - minHeight);
-            modelObj.collisionBB.z = (maxDepth - minDepth);
+            modelObj.collisionBoundingBox.x = (maxWidth - minWidth);
+            modelObj.collisionBoundingBox.y = (maxHeight - minHeight);
+            modelObj.collisionBoundingBox.z = (maxDepth - minDepth);
             modelObj.position = objPosition;
         }
     }

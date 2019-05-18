@@ -88,6 +88,7 @@
     </Compile>
     <Compile Include="Ground.cs" />
     <Compile Include="InteractiveModel.cs" />
+    <Compile Include="LoadScreen.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="md2.cs" />
     <Compile Include="Model.cs" />
@@ -96,11 +97,14 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Renderer.cs" />
+    <Compile Include="ScreenClass.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="Skybox.cs" />
+    <Compile Include="StartScreen.cs" />
     <Compile Include="Texture.cs" />
     <EmbeddedResource Include="GraphicsForm.resx">
       <DependentUpon>GraphicsForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -165,6 +169,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Shaders\2Dfrag.fragmentshader" />
+    <None Include="Shaders\2Dvertex.vertexshader" />
     <None Include="Shaders\SimpleFragmentShader.fragmentshader" />
     <None Include="Shaders\SimpleVertexShader.vertexshader" />
   </ItemGroup>

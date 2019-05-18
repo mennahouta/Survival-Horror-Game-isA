@@ -8,6 +8,13 @@ using System.Collections.Generic;
 
 namespace Graphics {
     public partial class GraphicsForm : Form {
+        public static bool gameStarted = false;
+        public static int sanityCount = 5;
+        public static List<int> skybox_waitingTimes = new List<int> { 10, 30, 30, 30, 30, 30, 30 };
+
+        string currentScreen;
+        StartScreen startScreen = new StartScreen();
+        LoadScreen loadScreen = new LoadScreen();
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
 
@@ -20,8 +27,11 @@ namespace Graphics {
         };
 
         float deltaTime;
-        public GraphicsForm() {
+        public GraphicsForm(string currScreen) {
+            currentScreen = currScreen;
+
             InitializeComponent();
+
             #region Full-Screen
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Size = GetScreen().Size;
@@ -34,7 +44,8 @@ namespace Graphics {
             initialize();
             deltaTime = 0.005f;
             #region Threads
-            Thread.CurrentThread.Name = "Main";
+            if(Thread.CurrentThread.Name == "")
+                Thread.CurrentThread.Name = "Main";
 
             MainLoopThread = new Thread(MainLoop);
             MainLoopThread.Name = "MainLoop Thread";
@@ -43,9 +54,20 @@ namespace Graphics {
         }
         void initialize() {
             //InteractiveModel.radio_sound.open(Renderer.projectPath + "tst.mp3");
+            if (currentScreen == "start")
+                startScreen.Initialize();
+            if (currentScreen == "load")
+                loadScreen.Initialize();
+            if (currentScreen == "renderer") { 
+                loadScreen.Initialize();
             renderer.Initialize();
+            }
         }
         void MainLoop() {
+            if (currentScreen == "start")
+                startScreen.Draw();
+            if (currentScreen == "load")
+                loadScreen.Draw();
             while (true) {
                 try {
                     renderer.Flush_Existing_IOBJ();
@@ -56,15 +78,18 @@ namespace Graphics {
                 simpleOpenGlControl1.Refresh();
             }
         }
-        private void GraphicsForm_FormClosing(object sender, FormClosingEventArgs e) {
-            renderer.CleanUp();
-            MainLoopThread.Abort();
-        }
 
         private void simpleOpenGlControl1_Paint(object sender, PaintEventArgs e) {
             try {
-                renderer.Draw();
-                renderer.Update(deltaTime);
+                if (currentScreen == "start")
+                    startScreen.Draw();
+                if (currentScreen == "load")
+                    loadScreen.Draw();
+                if (currentScreen == "renderer") {
+                    loadScreen.Draw();
+                    renderer.Draw();
+                    renderer.Update(deltaTime);
+                }
             }
             catch { }
         }
@@ -72,62 +97,70 @@ namespace Graphics {
         private void simpleOpenGlControl1_KeyPress(object sender, KeyPressEventArgs e) {
             //Exit Application
             if (e.KeyChar == (char)(27)) {
-                renderer.CleanUp();
+                if (gameStarted) {
+                    loadScreen.CleanUp();
+                    renderer.CleanUp();
+                }
+                else
+                    startScreen.CleanUp();   
                 MainLoopThread.Abort();
                 this.Close();
             }
 
-            float speed = 3f;
-            if (e.KeyChar == 'a')
-                Renderer.cam.Strafe(-speed);
-            if (e.KeyChar == 'd')
-                Renderer.cam.Strafe(speed);
-            if (e.KeyChar == 's')
-                Renderer.cam.Walk(-speed);
-            if (e.KeyChar == 'w')
-                Renderer.cam.Walk(speed);
-            if (e.KeyChar == 'z')
-                Renderer.cam.Fly(-speed);
-            if (e.KeyChar == 'c')
-                Renderer.cam.Fly(speed);
-            if (e.KeyChar == 'e') {
-                try {
-                    modelType currentInteractionType = renderer.InteractiveCheck();
+            if (currentScreen == "renderer") {
+                float speed = 3f;
+                if (e.KeyChar == 'a')
+                    Renderer.cam.Strafe(-speed);
+                if (e.KeyChar == 'd')
+                    Renderer.cam.Strafe(speed);
+                if (e.KeyChar == 's')
+                    Renderer.cam.Walk(-speed);
+                if (e.KeyChar == 'w')
+                    Renderer.cam.Walk(speed);
+                if (e.KeyChar == 'z')
+                    Renderer.cam.Fly(-speed);
+                if (e.KeyChar == 'c')
+                    Renderer.cam.Fly(speed);
+                if (e.KeyChar == 'e') {
+                    try {
+                        modelType currentInteractionType = renderer.InteractiveCheck();
 
-                    #region Garbage interaction
-                    if (currentInteractionType == modelType.GARBAGE) {
-                        if (Renderer.playerHasKey)
-                            MessageBox.Show(garbageMessages[0]);
-                        else {
-                            Random random = new Random();
-                            MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
+                        #region Garbage interaction
+                        if (currentInteractionType == modelType.GARBAGE) {
+                            if (Renderer.playerHasKey)
+                                MessageBox.Show(garbageMessages[0]);
+                            else {
+                                Random random = new Random();
+                                MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
+                            }
                         }
-                    }
-                    #endregion
+                        #endregion
 
+                    }
+                    catch { }
                 }
-                catch { }
             }
 
         }
 
         float prevX, prevY;
         private void simpleOpenGlControl1_MouseMove(object sender, MouseEventArgs e) {
-            float speed = 0.05f;
-            float delta = e.X - prevX;
-            if (delta > 2)
-                Renderer.cam.Yaw(-speed);
-            else if (delta < -2)
-                Renderer.cam.Yaw(speed);
+            if(currentScreen == "renderer") {
+                float speed = 0.05f;
+                float delta = e.X - prevX;
+                if (delta > 2)
+                    Renderer.cam.Yaw(-speed);
+                else if (delta < -2)
+                    Renderer.cam.Yaw(speed);
 
+                delta = e.Y - prevY;
+                if (delta > 2)
+                    Renderer.cam.Pitch(-speed);
+                else if (delta < -2)
+                    Renderer.cam.Pitch(speed);
 
-            delta = e.Y - prevY;
-            if (delta > 2)
-                Renderer.cam.Pitch(-speed);
-            else if (delta < -2)
-                Renderer.cam.Pitch(speed);
-
-            MoveCursor();
+                MoveCursor();
+            }
         }
 
         private void MoveCursor() {
@@ -137,6 +170,20 @@ namespace Graphics {
             Cursor.Clip = new Rectangle(this.Location, this.Size);
             prevX = simpleOpenGlControl1.Location.X + simpleOpenGlControl1.Size.Width / 2;
             prevY = simpleOpenGlControl1.Location.Y + simpleOpenGlControl1.Size.Height / 2;
+        }
+
+        private void simpleOpenGlControl1_MouseClick(object sender, MouseEventArgs e) {
+            //MessageBox.Show(e.X.ToString() + ", " + e.Y.ToString());
+            if(currentScreen == "start") {
+                if(startScreen.startButtonClicked(e.X, e.Y)) {
+                    gameStarted = true;
+                    this.Hide();
+                    MainLoopThread.Abort();
+                    startScreen.CleanUp();
+                    GraphicsForm rendererForm = new GraphicsForm("renderer");
+                    rendererForm.Show();
+                }
+            }
         }
 
         public Rectangle GetScreen() {

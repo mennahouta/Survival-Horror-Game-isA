@@ -8,6 +8,7 @@ using Tao.OpenGl;
 using GlmNet;
 using System.IO;
 using System.Threading;
+
 namespace Graphics
 {
     enum skyboxType
@@ -23,10 +24,7 @@ namespace Graphics
     }
 
     
-    class Renderer
-    {
-        public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
-
+    class Renderer : ScreenClass {
         #region Shaders declaration
         Shader sh, sh2D;
         #endregion
@@ -142,14 +140,14 @@ namespace Graphics
         int modelMat2D_ID;
         #endregion
 
-        public void Initialize()
-        {   
+        public override void Initialize()
+        {
             #region Shaders intialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
             sh2D = new Shader(projectPath + "\\Shaders\\2Dvertex.vertexshader", projectPath + "\\Shaders\\2Dfrag.fragmentshader");
             #endregion
 
-            Gl.glClearColor(0, 0, 0.4f, 1);
+            //Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
             cam.Reset(180, 30, 800, 20, 20, 150, 0, 1, 0);
@@ -334,15 +332,13 @@ namespace Graphics
             Gl.glDepthFunc(Gl.GL_LESS);
         }
 
-
-        //didn't add COLLISION BOUNDING BOXES HERE CUZ IDK IF WE'LL USE THIS FUNC
         #region
         public void LoadSkyboxModels()
         {
-
             skyboxType SKYBOX = (skyboxType)currentSkyboxID;
             if (PrevoiuslyLoaded[(int)SKYBOX])
                 return;
+
             Random random = new Random();
             switch (SKYBOX)
             {
@@ -668,7 +664,7 @@ namespace Graphics
             #endregion
         }
 
-        public void Draw() {
+        public override void Draw() {
             LoadSkyboxModels();
 
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
@@ -800,9 +796,10 @@ namespace Graphics
             Gl.glUniform3fv(IntensityID, 1, LightIntensity[currentSkyboxID].to_array());
         }
 
-        public void CleanUp()
+        public override void CleanUp()
         {
             sh.DestroyShader();
+            sh2D.DestroyShader();
         }
 
         public modelType InteractiveCheck()
@@ -873,6 +870,7 @@ namespace Graphics
             //return modelType.NULL;
             #endregion
         }
+
         public void setCollisionBoundingBox(vec3 objPosition, Model3D modelObj)
         {
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;

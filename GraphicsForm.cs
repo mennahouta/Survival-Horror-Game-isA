@@ -48,7 +48,7 @@ namespace Graphics {
         void MainLoop() {
             while (true) {
                 try {
-                    renderer.Flush_Existing_IOBJ();
+                    //renderer.Flush_Existing_IOBJ();
                     renderer.Draw();
                     renderer.Update(deltaTime);
                 }
@@ -100,7 +100,8 @@ namespace Graphics {
                             MessageBox.Show(garbageMessages[0]);
                         else {
                             Random random = new Random();
-                            MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
+                            MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count - 1)]);
+                            //MessageBox.Show(Renderer.key_garbageID.ToString());
                         }
                     }
                     #endregion

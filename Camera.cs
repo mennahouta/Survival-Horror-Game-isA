@@ -141,7 +141,7 @@ namespace Graphics
                     return false;
             }
             for (int i = 0; i < Renderer.Models_Interactive.Count; i++) {
-                if (!Renderer.Models_Interactive[i].isDrawn)
+                if (!Renderer.Models_Interactive[i].obj.isDrawn)
                     continue;
                 DistanceX = Math.Abs(result.x - Renderer.Models_Interactive[i].obj.position.x);
                 DistanceY = Math.Abs(result.y - Renderer.Models_Interactive[i].obj.position.y);

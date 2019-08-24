@@ -8,7 +8,6 @@ using Tao.OpenGl;
 using GlmNet;
 using System.IO;
 using System.Threading;
-
 namespace Graphics
 {
     enum skyboxType
@@ -23,18 +22,11 @@ namespace Graphics
         MAX_SKYBOXES
     }
 
-    
-    class Renderer : ScreenClass {
-        #region Shaders declaration
-        Shader sh;
-        Shader sh2D;
-        #endregion
+    class Renderer: ScreenClass{
+        //public static string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
 
-        #region Interactive text declaration
-        Model obj2D;
-        Texture ch1_phone;
-        Texture ch2_paper;
-        Texture ch3_paper;
+        #region Shaders declaration
+        Shader sh, sh2D;
         #endregion
 
         #region Matricies declaration
@@ -92,14 +84,11 @@ namespace Graphics
 
         public float Speed = 1;
 
-        public static bool drawText = false;
-
         Ground g_down;
 
-        List<Boolean> PrevoiuslyLoaded;
+        public static List<Boolean> PrevoiuslyLoaded;
         #region 3D Models declaration
-        Model3D car, watchtower, house_obj, kitchen;
-
+        Model3D car, watchtower, house_obj;
         List<Model3D> bedroomFurni;
         List<Model3D> livingFurni;
         List<Model3D> bathroomFurni;
@@ -110,7 +99,7 @@ namespace Graphics
         public static List<Skybox> skyboxes;
         public static int currentSkyboxID = 0; //FORREST
 
-        InteractiveModel radio, phone, gun;
+        InteractiveModel radio, phone, gun, paper1, paper2;
 
         #region GARBAGE
         public static List<InteractiveModel> garbages;
@@ -137,50 +126,32 @@ namespace Graphics
 
         public static bool drawText = false;
         #region 2D Models declaration
+        public Boolean pauseScreen = false;
+        Model pauseScreen_obj;
+        #region Text
         Model obj2D;
         List<Texture> chapter;
         int modelMat2D_ID;
-
+        Model lbl_pressSpace;
+        public static bool text_shown = false;
+        #endregion
         #region Sanity Data Declaration
         Model sanityBar;
         int fadingValueID, isFadingID;
         float fadingValue;
+        public static Boolean lostSanity = false;
+        #endregion
+        #region GameOver
+        Model gameover_background, lbl_gameover;
+        #endregion
         #endregion
 
-        public void Initialize()
+        public override void Initialize()
         {   
-            #region Shaders initialization
+            #region Shaders intialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
             sh2D = new Shader(projectPath + "\\Shaders\\2Dvertex.vertexshader", projectPath + "\\Shaders\\2Dfrag.fragmentshader");
             #endregion
-
-            #region Interactive text initialization
-            ch1_phone = new Texture(projectPath + "\\Textures\\ch1.png", 20);
-            ch2_paper = new Texture(projectPath + "\\Textures\\ch2.png", 21);
-            ch3_paper = new Texture(projectPath + "\\Textures\\ch3.png", 22);
-
-            obj2D = new Model();
-            obj2D.vertices.Add(new vec3(-1, 1, 0));
-            obj2D.vertices.Add(new vec3(1, -1, 0));
-            obj2D.vertices.Add(new vec3(-1, -1, 0));
-            obj2D.vertices.Add(new vec3(1, 1, 0));
-            obj2D.vertices.Add(new vec3(-1, 1, 0));
-            obj2D.vertices.Add(new vec3(1, -1, 0));
-
-            obj2D.uvCoordinates.Add(new vec2(0, 0));
-            obj2D.uvCoordinates.Add(new vec2(1, 1));
-            obj2D.uvCoordinates.Add(new vec2(0, 1));
-            obj2D.uvCoordinates.Add(new vec2(1, 0));
-            obj2D.uvCoordinates.Add(new vec2(0, 0));
-            obj2D.uvCoordinates.Add(new vec2(1, 1));
-
-            obj2D.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
-                glm.scale(new mat4(1), new vec3(1f, 1f, 1)),
-                glm.translate(new mat4(1), new vec3(1.5f, 1f, 0)) }
-            );
-            #endregion
-
-            //Gl.glClearColor(0, 0, 0.4f, 1);
             
             cam = new Camera();
             cam.Reset(180, 30, 800, 20, 20, 150, 0, 1, 0);
@@ -206,7 +177,7 @@ namespace Graphics
             obj2D.uvCoordinates.Add(new vec2(1, 1));
 
             obj2D.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
-                glm.scale(new mat4(1), new vec3(0.3f, 1f, 1)), //need to be updated with every skybox FML
+                glm.scale(new mat4(1), new vec3(0.3f, 0.8f, 1)), //need to be updated with every skybox FML
                 glm.translate(new mat4(1), new vec3(0, 0, 0)) }
             );
             obj2D.Initialize();
@@ -218,7 +189,30 @@ namespace Graphics
                 new Texture(projectPath + "\\Textures\\ch3.png", 29),
             };
             #endregion
+            #region lbl_pressSpace
+            lbl_pressSpace = new Model();
+            lbl_pressSpace.vertices.Add(new vec3(-1, 1, 0));
+            lbl_pressSpace.vertices.Add(new vec3(1, -1, 0));
+            lbl_pressSpace.vertices.Add(new vec3(-1, -1, 0));
+            lbl_pressSpace.vertices.Add(new vec3(1, 1, 0));
+            lbl_pressSpace.vertices.Add(new vec3(-1, 1, 0));
+            lbl_pressSpace.vertices.Add(new vec3(1, -1, 0));
 
+            lbl_pressSpace.uvCoordinates.Add(new vec2(0, 0));
+            lbl_pressSpace.uvCoordinates.Add(new vec2(1, 1));
+            lbl_pressSpace.uvCoordinates.Add(new vec2(0, 1));
+            lbl_pressSpace.uvCoordinates.Add(new vec2(1, 0));
+            lbl_pressSpace.uvCoordinates.Add(new vec2(0, 0));
+            lbl_pressSpace.uvCoordinates.Add(new vec2(1, 1));
+
+            lbl_pressSpace.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
+                glm.scale(new mat4(1), new vec3(0.75f, 0.1f, 1)), //need to be updated with every skybox FML
+                glm.translate(new mat4(1), new vec3(0, -.9f, 0)) }
+            );
+
+            lbl_pressSpace.texture = new Texture(projectPath + "\\Textures\\lbl_pressSpace.png", (texUnit_counter++) % 32, false); ;
+            lbl_pressSpace.Initialize();
+            #endregion
             #region Sanity Bar
             sanityBar = new Model();
             sanityBar.vertices.Add(new vec3(-1, 1, 0));
@@ -246,6 +240,68 @@ namespace Graphics
 
             fadingValue = 0;
             #endregion
+            #region Game Over
+            gameover_background = new Model();
+            gameover_background.vertices.Add(new vec3(-1, 1, 0));
+            gameover_background.vertices.Add(new vec3(1, -1, 0));
+            gameover_background.vertices.Add(new vec3(-1, -1, 0));
+            gameover_background.vertices.Add(new vec3(1, 1, 0));
+            gameover_background.vertices.Add(new vec3(-1, 1, 0));
+            gameover_background.vertices.Add(new vec3(1, -1, 0));
+
+            gameover_background.uvCoordinates.Add(new vec2(0, 0));
+            gameover_background.uvCoordinates.Add(new vec2(1, 1));
+            gameover_background.uvCoordinates.Add(new vec2(0, 1));
+            gameover_background.uvCoordinates.Add(new vec2(1, 0));
+            gameover_background.uvCoordinates.Add(new vec2(0, 0));
+            gameover_background.uvCoordinates.Add(new vec2(1, 1));
+
+            gameover_background.texture = new Texture(projectPath + "\\Textures\\grimmnight_dn.jpg", (texUnit_counter++) % 32, false); ;
+            gameover_background.Initialize();
+
+            lbl_gameover = new Model();
+            lbl_gameover.vertices.Add(new vec3(-1, 1, 0));
+            lbl_gameover.vertices.Add(new vec3(1, -1, 0));
+            lbl_gameover.vertices.Add(new vec3(-1, -1, 0));
+            lbl_gameover.vertices.Add(new vec3(1, 1, 0));
+            lbl_gameover.vertices.Add(new vec3(-1, 1, 0));
+            lbl_gameover.vertices.Add(new vec3(1, -1, 0));
+
+            lbl_gameover.uvCoordinates.Add(new vec2(0, 0));
+            lbl_gameover.uvCoordinates.Add(new vec2(1, 1));
+            lbl_gameover.uvCoordinates.Add(new vec2(0, 1));
+            lbl_gameover.uvCoordinates.Add(new vec2(1, 0));
+            lbl_gameover.uvCoordinates.Add(new vec2(0, 0));
+            lbl_gameover.uvCoordinates.Add(new vec2(1, 1));
+
+            lbl_gameover.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
+                glm.scale(new mat4(1), new vec3(0.85f, 0.5f, 1)),
+                glm.translate(new mat4(1), new vec3(0, 0, 0)) }
+            );
+
+            lbl_gameover.texture = new Texture(projectPath + "\\Textures\\gameover.png", (texUnit_counter++) % 32, false); ;
+            lbl_gameover.Initialize();
+            #endregion
+            #region pause
+            pauseScreen_obj = new Model();
+            pauseScreen_obj.vertices.Add(new vec3(-1, 1, 0));
+            pauseScreen_obj.vertices.Add(new vec3(1, -1, 0));
+            pauseScreen_obj.vertices.Add(new vec3(-1, -1, 0));
+            pauseScreen_obj.vertices.Add(new vec3(1, 1, 0));
+            pauseScreen_obj.vertices.Add(new vec3(-1, 1, 0));
+            pauseScreen_obj.vertices.Add(new vec3(1, -1, 0));
+
+            pauseScreen_obj.uvCoordinates.Add(new vec2(0, 0));
+            pauseScreen_obj.uvCoordinates.Add(new vec2(1, 1));
+            pauseScreen_obj.uvCoordinates.Add(new vec2(0, 1));
+            pauseScreen_obj.uvCoordinates.Add(new vec2(1, 0));
+            pauseScreen_obj.uvCoordinates.Add(new vec2(0, 0));
+            pauseScreen_obj.uvCoordinates.Add(new vec2(1, 1));
+
+            pauseScreen_obj.texture = new Texture(projectPath + "\\Textures\\pause.jpg", (texUnit_counter++) % 32, false); ;
+            pauseScreen_obj.Initialize();
+
+            #endregion
             #endregion
 
             #region Matricies intialization
@@ -259,16 +315,16 @@ namespace Graphics
             modelmatrix = glm.scale(new mat4(1), new vec3(50, 50, 50));
             #endregion
 
-            //sh.UseShader();
+            sh.UseShader();
 
             g_down = new Ground(2100, 2100, 2, 2);
 
             #region Skyboxes intialization
         
             #region Initialize All Load of Skyboxes to False
-            PrevoiuslyLoaded = new List<Boolean>();
+            Renderer.PrevoiuslyLoaded = new List<Boolean>();
             for (int i = 0; i < (int)skyboxType.MAX_SKYBOXES; i++)
-                PrevoiuslyLoaded.Add(false);
+                Renderer.PrevoiuslyLoaded.Add(false);
             #endregion
 
             List<List<String>> skyboxes_textures = new List<List<String>>()
@@ -321,6 +377,7 @@ namespace Graphics
             #endregion
 
             #region Doors initialization
+            #region Doors list
             doors = new List<InteractiveModel>()
             {
                 new InteractiveModel("door", "door", texUnit_counter%32, 15, modelType.DOOR, 0),       //0: Front door, from 0 <-> 1
@@ -331,7 +388,7 @@ namespace Graphics
                 new InteractiveModel("door", "door_in", texUnit_counter%32, 7, modelType.DOOR, 5),     //5: trapDr, from 5 ->6 (game over)
             };
             texUnit_counter++;
-
+            #endregion
             #region Transformations
             doors[0].Scale(.5f, .5f, .5f);
             for (int i = 1; i < doors.Count; i++)
@@ -343,7 +400,6 @@ namespace Graphics
             doors[3].Translate(80, 0, 0);
             doors[4].Translate(270, 0, 300);
             #endregion
-
             #region Doors collision boundingboxes
             setCollisionBoundingBox(doors[0].position, doors[0].obj);
             scaleBoundingBox(new vec3(.5f, .5f, .5f), doors[0].obj);
@@ -377,10 +433,10 @@ namespace Graphics
 
         public void LoadSkyboxModels()
         {
-            skyboxType SKYBOX = (skyboxType)currentSkyboxID;
-            if (PrevoiuslyLoaded[(int)SKYBOX])
-                return;
 
+            skyboxType SKYBOX = (skyboxType)currentSkyboxID;
+            if (Renderer.PrevoiuslyLoaded[(int)SKYBOX])
+                return;
             Random random = new Random();
             switch (SKYBOX)
             {
@@ -438,10 +494,13 @@ namespace Graphics
                     Models_3D.Add(house_obj);
                     #endregion
                     #region Phone Model
-                    phone = new InteractiveModel("phone", "iPhone 6", texUnit_counter % 32, 8, modelType.TEXT, 0);
+                    phone = new InteractiveModel("phone", "iPhone 6", texUnit_counter % 32, 200, modelType.TEXT, 0);
                     texUnit_counter++;
                     phone.Scale(0.4f, 0.4f, 0.4f);
-                    phone.Translate(180, 2, 800);
+                    phone.Translate(170, 2, 800);
+                    setCollisionBoundingBox(new vec3(170, 2, 800), phone.obj);
+                    scaleBoundingBox(new vec3(0, 0, 0), phone.obj);
+                    Models_Interactive.Add(phone);
                     #endregion
                     #region Grass Models
                     num_grass = random.Next(rnd_grass_L, rnd_grass_H);
@@ -577,6 +636,15 @@ namespace Graphics
                         Models_3D.Add(bedroomFurni[i]);
                     }
                     #endregion
+
+                    #region Paper1
+                    paper1 = new InteractiveModel("Folders", "messy_folder", texUnit_counter % 32, 30, modelType.TEXT, 1);
+                    texUnit_counter++;
+                    paper1.Translate(15, 77, 140);
+                    setCollisionBoundingBox(new vec3(15, 77, 140), paper1.obj);
+                    scaleBoundingBox(new vec3(0, 0, 0), paper1.obj);
+                    Models_Interactive.Add(paper1);
+                    #endregion
                     #endregion
                     break;
                 #endregion
@@ -686,6 +754,14 @@ namespace Graphics
                     setCollisionBoundingBox(new vec3(70, 60, 180), gun.obj);
                     Models_Interactive.Add(gun);
                     #endregion
+                    #region Paper1
+                    paper2 = new InteractiveModel("Folders", "messy_folder", texUnit_counter % 32, 40, modelType.TEXT, 1);
+                    texUnit_counter++;
+                    paper2.Translate(130, 58, 180);
+                    setCollisionBoundingBox(new vec3(130, 58, 180), paper2.obj);
+                    scaleBoundingBox(new vec3(0, 0, 0), paper2.obj);
+                    Models_Interactive.Add(paper2);
+                    #endregion
                     break;
                 #endregion
                 #region BASEMENT
@@ -693,7 +769,7 @@ namespace Graphics
                     break;
                     #endregion
             }
-            PrevoiuslyLoaded[(int)SKYBOX] = true;
+            Renderer.PrevoiuslyLoaded[(int)SKYBOX] = true;
         }
 
         public void Flush_Existing_OBJ()
@@ -734,7 +810,7 @@ namespace Graphics
             #endregion
 
             skyboxes[currentSkyboxID].Draw(transID);
-            if (PrevoiuslyLoaded[currentSkyboxID]) {
+            if (Renderer.PrevoiuslyLoaded[currentSkyboxID]) {
                 try {
                     SendLightData();
 
@@ -786,6 +862,7 @@ namespace Graphics
                         doors[4].Draw(transID);
                         for (int i = 0; i < bedroomFurni.Count; i++)
                             bedroomFurni[i].Draw(transID);
+                        paper1.Draw(transID);
                     }
                     #endregion
                     #region Kitchen
@@ -808,6 +885,7 @@ namespace Graphics
                         for (int i = 0; i < closetFurni.Count; i++)
                             closetFurni[i].Draw(transID);
                         gun.Draw(transID);
+                        paper2.Draw(transID);
                     }
                     #endregion
                     #region Basement
@@ -824,8 +902,33 @@ namespace Graphics
             Gl.glUniform1f(isFadingID, 0);
             Gl.glUniform1f(fadingValueID, fadingValue);
             #region 2D Drawing
-            //obj2D.texture = chapter[0];
-            //obj2D.Draw(modelMat2D_ID);
+            if(pauseScreen)
+            {
+                pauseScreen_obj.Draw(modelMat2D_ID);
+            }
+
+            if (text_shown)
+            {
+                if (currentSkyboxID == 0)
+                {
+                    obj2D.texture = chapter[0];
+                    //apply transformtation
+                }
+                else if (currentSkyboxID == (int)(skyboxType.BEDROOM))
+                {
+                    obj2D.texture = chapter[1];
+                }
+                else if (currentSkyboxID == (int)(skyboxType.CLOSET))
+                {
+                    obj2D.texture = chapter[2];
+                }
+                obj2D.Draw(modelMat2D_ID);
+
+                Gl.glEnable(Gl.GL_BLEND);
+                Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
+                lbl_pressSpace.Draw(modelMat2D_ID);
+                Gl.glDisable(Gl.GL_BLEND);
+            }
             #endregion
             Gl.glEnable(Gl.GL_DEPTH_TEST);
         }
@@ -841,11 +944,19 @@ namespace Graphics
             #region Sanity Update and Check on Game Over
             if (!checkInLight())
             {
-                fadingValue += 0.00002f;
+                //fadingValue += 0.00002f;
+                fadingValue += 0.0002f;
                 if (fadingValue >= 1)
                 {
                     fadingValue = 1;
-                    //Game Over
+                    lostSanity = true;
+
+                    gameover_background.Draw(modelMat2D_ID);
+                    Gl.glEnable(Gl.GL_BLEND);
+                    Gl.glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA);
+                    lbl_gameover.Draw(modelMat2D_ID);
+                    lbl_pressSpace.Draw(modelMat2D_ID);
+                    Gl.glDisable(Gl.GL_BLEND);
                 }
             }
             Gl.glUniform1f(isFadingID, 1.0f);
@@ -904,7 +1015,6 @@ namespace Graphics
             }
             return modelType.NULL;
         }
-
 
         public void setCollisionBoundingBox(vec3 objPosition, Model3D modelObj)
         {

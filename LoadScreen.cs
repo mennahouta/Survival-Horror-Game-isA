@@ -51,7 +51,7 @@ namespace Graphics {
             background.uvCoordinates.Add(new vec2(1, 1));
             background.uvCoordinates.Add(new vec2(0, 1));
 
-            background.texture = new Texture(projectPath + "\\Textures\\loading.jpg", texUnit++, true);
+            background.texture = new Texture(projectPath + "\\Textures\\loading.jpg", (texUnit++) % 32, true);
 
             background.Initialize();
             #endregion
@@ -62,7 +62,9 @@ namespace Graphics {
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT);
             sh.UseShader();
 
+            Gl.glDisable(Gl.GL_DEPTH_TEST);
             background.Draw(transID);
+            Gl.glEnable(Gl.GL_DEPTH_TEST);
         }
 
         public override void CleanUp() {

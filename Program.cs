@@ -16,6 +16,7 @@ namespace Graphics
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            //Application.Run(new GraphicsForm("renderer"));
             Application.Run(new GraphicsForm("start"));
         }
     }

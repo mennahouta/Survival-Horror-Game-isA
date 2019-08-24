@@ -15,9 +15,10 @@ namespace Graphics {
         string currentScreen;
         StartScreen startScreen = new StartScreen();
         LoadScreen loadScreen = new LoadScreen();
+
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
-      
+
         List<String> garbageMessages = new List<string>(){
             "You have found the key, I'm impressed!",
             "Garbage. Garbage everywhere.",
@@ -25,9 +26,14 @@ namespace Graphics {
             "People can be very messy.",
             "You're going to be very smelly."
         };
-      
+
+        MP3_player stepsOut = new MP3_player();
+        MP3_player stepsIn = new MP3_player();
+        bool stepsOn = false;
+
         float deltaTime;
-        public GraphicsForm(string currScreen) {
+        public GraphicsForm(string currScreen)
+        {
             currentScreen = currScreen;
 
             InitializeComponent();
@@ -39,12 +45,14 @@ namespace Graphics {
             #endregion
             simpleOpenGlControl1.InitializeContexts();
 
+            Cursor.Hide();
+
             MoveCursor();
 
             initialize();
             deltaTime = 0.005f;
             #region Threads
-            if(Thread.CurrentThread.Name == "")
+            if (Thread.CurrentThread.Name == "")
                 Thread.CurrentThread.Name = "Main";
 
             MainLoopThread = new Thread(MainLoop);
@@ -52,25 +60,28 @@ namespace Graphics {
             MainLoopThread.Start();
             #endregion
         }
+
         void initialize() {
-            //InteractiveModel.radio_sound.open(Renderer.projectPath + "tst.mp3");
             if (currentScreen == "start")
                 startScreen.Initialize();
             if (currentScreen == "load")
                 loadScreen.Initialize();
-            if (currentScreen == "renderer") { 
-                loadScreen.Initialize();
-            renderer.Initialize();
+            if (currentScreen == "renderer")
+            {
+                //loadScreen.Initialize();
+                renderer.Initialize();
+                stepsOut.open(Renderer.projectPath + @"\Sounds\forest_footsteps.mp3");
+                stepsIn.open(Renderer.projectPath + @"\Sounds\footsteps_house.mp3");
             }
         }
+
         void MainLoop() {
             if (currentScreen == "start")
                 startScreen.Draw();
-            if (currentScreen == "load")
-                loadScreen.Draw();
             while (true) {
                 try {
-                    //renderer.Flush_Existing_IOBJ();
+                    //if (!Renderer.PrevoiuslyLoaded[Renderer.currentSkyboxID])
+                    //    loadScreen.Draw();
                     renderer.Draw();
                     renderer.Update(deltaTime);
                 }
@@ -86,7 +97,8 @@ namespace Graphics {
                 if (currentScreen == "load")
                     loadScreen.Draw();
                 if (currentScreen == "renderer") {
-                    loadScreen.Draw();
+                    //if (!Renderer.PrevoiuslyLoaded[Renderer.currentSkyboxID])
+                    //    loadScreen.Draw();
                     renderer.Draw();
                     renderer.Update(deltaTime);
                 }
@@ -95,21 +107,62 @@ namespace Graphics {
         }
 
         private void simpleOpenGlControl1_KeyPress(object sender, KeyPressEventArgs e) {
-            //Exit Application
-            if (e.KeyChar == (char)(27)) {
-                if (gameStarted) {
-                    loadScreen.CleanUp();
-                    renderer.CleanUp();
+            if (e.KeyChar == (char)(32) || e.KeyChar == (char)(13))//space or enter 
+            {
+                if (currentScreen == "start")
+                {
+                    if (StartScreen.currentBtnIDX == 0) //Play
+                    {
+                        gameStarted = true;
+                        MainLoopThread.Abort();
+                        startScreen.CleanUp();
+                        GraphicsForm rendererForm = new GraphicsForm("renderer");
+                        this.Hide();
+                        rendererForm.ShowDialog();
+                        this.Close();
+                    }
+                    else //Exit
+                    {
+                        if (gameStarted)
+                        {
+                            //loadScreen.CleanUp();
+                            renderer.CleanUp();
+                        }
+                        else
+                            startScreen.CleanUp();
+                        MainLoopThread.Abort();
+                        this.Close();
+                    }
                 }
-                else
-                    startScreen.CleanUp();   
-                MainLoopThread.Abort();
-                this.Close();
             }
 
-            if (currentScreen == "renderer") 
-            {
+            if (currentScreen == "renderer") {
+                if (e.KeyChar == (char)(27))
+                {
+                    renderer.pauseScreen = !renderer.pauseScreen;
+                }
+
+                if(e.KeyChar == (char)(32))
+                {
+                    if (Renderer.lostSanity || renderer.pauseScreen)
+                    {
+                        gameStarted = false;
+                        MainLoopThread.Abort();
+                        renderer.CleanUp();
+                        GraphicsForm startForm = new GraphicsForm("start");
+                        this.Hide();
+                        startForm.ShowDialog();
+                        this.Close();
+                    }
+                    if (Renderer.text_shown)
+                    {
+                        Renderer.text_shown = false;
+                    }
+                }
+
                 float speed = 3f;
+                if (Renderer.currentSkyboxID == 0)
+                    speed = 1.5f;
                 if (e.KeyChar == 'a')
                     Renderer.cam.Strafe(-speed);
                 if (e.KeyChar == 'd')
@@ -118,34 +171,38 @@ namespace Graphics {
                     Renderer.cam.Walk(-speed);
                 if (e.KeyChar == 'w')
                     Renderer.cam.Walk(speed);
-                if (e.KeyChar == 'z')
-                    Renderer.cam.Fly(-speed);
-                if (e.KeyChar == 'c')
-                    Renderer.cam.Fly(speed);
+                if (Camera.Move && e.KeyChar != 'e')
+                    WalkSound();
+                //if (e.KeyChar == 'z')
+                //    Renderer.cam.Fly(-speed);
+                //if (e.KeyChar == 'c')
+                //    Renderer.cam.Fly(speed);
                 if (e.KeyChar == 'e') {
-                    try 
-                    {
+                    try {
                         modelType currentInteractionType = renderer.InteractiveCheck();
 
                         #region Garbage interaction
                         if (currentInteractionType == modelType.GARBAGE) {
-                            if (Renderer.playerHasKey)
-                                MessageBox.Show(garbageMessages[0]);
-                            else {
-                                Random random = new Random();
-                                MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count)]);
-                            }
+                            //if (Renderer.playerHasKey)
+                            //    MessageBox.Show(garbageMessages[0]);
+                            //else
+                            //{
+                            //    Random random = new Random();
+                            //    MessageBox.Show(garbageMessages[random.Next(1, garbageMessages.Count - 1)]);
+                            //}
                         }
                         #endregion
+
                     }
                     catch { }
                 }
+                    
             }
         }
 
         float prevX, prevY;
         private void simpleOpenGlControl1_MouseMove(object sender, MouseEventArgs e) {
-            if(currentScreen == "renderer") {
+            if (currentScreen == "renderer") {
                 float speed = 0.05f;
                 float delta = e.X - prevX;
                 if (delta > 2)
@@ -172,18 +229,70 @@ namespace Graphics {
             prevY = simpleOpenGlControl1.Location.Y + simpleOpenGlControl1.Size.Height / 2;
         }
 
-        private void simpleOpenGlControl1_MouseClick(object sender, MouseEventArgs e) {
+        private void simpleOpenGlControl1_MouseClick(object sender, MouseEventArgs e)
+        {
             //MessageBox.Show(e.X.ToString() + ", " + e.Y.ToString());
-            if(currentScreen == "start") {
-                if(startScreen.startButtonClicked(e.X, e.Y)) {
+            if (currentScreen == "start") {
+                if (startScreen.startButtonClicked(e.X, e.Y)) {
                     gameStarted = true;
                     this.Hide();
                     MainLoopThread.Abort();
                     startScreen.CleanUp();
                     GraphicsForm rendererForm = new GraphicsForm("renderer");
-                    rendererForm.Show();
+                    rendererForm.ShowDialog();
+                    this.Close();
                 }
             }
+        }
+
+        private void GraphicsForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                MainLoopThread.Abort();
+            }
+            catch { }
+        }
+
+        private void simpleOpenGlControl1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Down)
+            {
+                StartScreen.currentBtnIDX++;
+                StartScreen.currentBtnIDX %= StartScreen.buttonsCount;
+            }
+
+            if (e.KeyCode == Keys.Up)
+            {
+                StartScreen.currentBtnIDX--;
+                StartScreen.currentBtnIDX %= StartScreen.buttonsCount;
+                StartScreen.currentBtnIDX += StartScreen.buttonsCount;
+                StartScreen.currentBtnIDX %= StartScreen.buttonsCount;
+            }
+        }
+
+        public void WalkSound()
+        {
+            if (!stepsOn)
+            {
+                stepsOn = true;
+                if (Renderer.currentSkyboxID == 0)
+                    stepsOut.PlayLooping();
+                else
+                {
+                    stepsOut.stop();
+                    stepsIn.PlayLooping();
+                }
+            }
+        }
+
+        private void simpleOpenGlControl1_KeyUp(object sender, KeyEventArgs e)
+        {
+            stepsOn = false;
+            //if (Renderer.currentSkyboxID == 0)
+            stepsOut.stop();
+            //else
+            stepsIn.stop();
         }
 
         public Rectangle GetScreen() {

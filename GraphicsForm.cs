@@ -10,7 +10,7 @@ namespace Graphics {
     public partial class GraphicsForm : Form {
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
-
+      
         List<String> garbageMessages = new List<string>(){
             "You have found the key, I'm impressed!",
             "Garbage. Garbage everywhere.",
@@ -18,7 +18,7 @@ namespace Graphics {
             "People can be very messy.",
             "You're going to be very smelly."
         };
-
+      
         float deltaTime;
         public GraphicsForm() {
             InitializeComponent();
@@ -108,8 +108,8 @@ namespace Graphics {
 
                 }
                 catch { }
-            }
 
+            }
         }
 
         float prevX, prevY;

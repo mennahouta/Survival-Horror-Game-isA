@@ -868,55 +868,6 @@ namespace Graphics
                 }
             }
             return modelType.NULL;
-
-            #region Old Code
-
-            //#region Doors
-            //for (int i = 0; i < doors.Count; i++) {
-            //    if (!doors[i].obj.isDrawn)
-            //        continue;
-            //    DistanceX = Math.Abs(cam.mPosition.x - doors[i].position.x);
-            //    DistanceY = Math.Abs(cam.mPosition.y - doors[i].position.y);
-            //    DistanceZ = Math.Abs(cam.mPosition.z - doors[i].position.z);
-            //    if (DistanceX < doors[i].interactionBB.x / 2
-            //     && DistanceY < doors[i].interactionBB.y / 2
-            //     && DistanceZ < doors[i].interactionBB.z / 2) {
-            //        doors[i].Event();
-            //        return modelType.DOOR;
-            //    }
-            //}
-            //#endregion
-
-            //#region Garbages
-            //for (int i = 0; i < numOfGarbages; i++) {
-            //    if (!garbages[i].obj.isDrawn)
-            //        continue;
-            //    DistanceX = Math.Abs(cam.mPosition.x - garbages[i].position.x);
-            //    DistanceY = Math.Abs(cam.mPosition.y - garbages[i].position.y);
-            //    DistanceZ = Math.Abs(cam.mPosition.z - garbages[i].position.z);
-            //    if (DistanceX < garbages[i].interactionBB.x / 2
-            //      && DistanceY < garbages[i].interactionBB.y / 2
-            //      && DistanceZ < garbages[i].interactionBB.z / 2) {
-            //        garbages[i].Event();
-            //        return modelType.GARBAGE;
-            //    }
-            //}
-            //#endregion
-
-            //#region radio check
-            //DistanceX = Math.Abs(cam.mPosition.x - radio.position.x);
-            //DistanceY = Math.Abs(cam.mPosition.y - radio.position.y);
-            //DistanceZ = Math.Abs(cam.mPosition.z - radio.position.z);
-            //if (DistanceX < radio.interactionBB.x / 2
-            //  && DistanceY < radio.interactionBB.y / 2
-            //  && DistanceZ < radio.interactionBB.z / 2) {
-            //    radio.Event();
-            //    return modelType.RADIO;
-            //}
-            //#endregion
-
-            //return modelType.NULL;
-            #endregion
         }
 
         public void setCollisionBoundingBox(vec3 objPosition, Model3D modelObj)
@@ -939,6 +890,7 @@ namespace Graphics
             modelObj.collisionBoundingBox.x = (maxWidth - minWidth);
             modelObj.collisionBoundingBox.y = (maxHeight - minHeight);
             modelObj.collisionBoundingBox.z = (maxDepth - minDepth);
+
             modelObj.position = objPosition;
         }
 

@@ -293,27 +293,6 @@ namespace Graphics
             #endregion
             #endregion
 
-            Random random = new Random();
-            #region 3D Models intialization            
-
-            //md2 needs boundingboxes
-            #region Lights Models
-            num_lights = random.Next(rnd_lights_L, rnd_lights_H);
-            Lights = new md2[num_lights];
-            for (int i = 0; i < num_lights; i++)
-            {
-                Lights[i] = new md2(projectPath + "\\ModelFiles\\LIGHT6.md2");
-                Lights[i].scaleMatrix = glm.scale(new mat4(1), new vec3(0.3f, 0.3f, 0.3f));
-                Lights[i].rotationMatrix = glm.rotate(-90.0f / 180 * 3.1412f, new vec3(1, 0, 0));
-                int x = random.Next(10, 990);
-                int y = 0;
-                int z = random.Next(10, 990);
-                vec3 pos = new vec3(x, y, z);
-                Lights[i].TranslationMatrix = glm.translate(new mat4(1), new vec3(x, y, z));
-            }
-            #endregion
-
-            #endregion
 
             #region Light Data intialization
             //get location of specular and attenuation then send their values
@@ -333,7 +312,6 @@ namespace Graphics
             Gl.glEnable(Gl.GL_DEPTH_TEST);
             Gl.glDepthFunc(Gl.GL_LESS);
         }
-
 
         //didn't add COLLISION BOUNDING BOXES HERE CUZ IDK IF WE'LL USE THIS FUNC
         #region
@@ -659,7 +637,7 @@ namespace Graphics
         {
             #region Doors
             for (int i = 0; i < doors.Count; i++)
-                doors[i].isDrawn = false;
+                doors[i].obj.isDrawn = false;
             #endregion
 
             #region Garbages
@@ -784,7 +762,6 @@ namespace Graphics
                 }
                 catch { }
             }
-
         }
 
         public void Update(float deltaTime) {
@@ -823,56 +800,8 @@ namespace Graphics
                 }
             }
             return modelType.NULL;
-
-            #region Old Code
-
-            //#region Doors
-            //for (int i = 0; i < doors.Count; i++) {
-            //    if (!doors[i].obj.isDrawn)
-            //        continue;
-            //    DistanceX = Math.Abs(cam.mPosition.x - doors[i].position.x);
-            //    DistanceY = Math.Abs(cam.mPosition.y - doors[i].position.y);
-            //    DistanceZ = Math.Abs(cam.mPosition.z - doors[i].position.z);
-            //    if (DistanceX < doors[i].interactionBB.x / 2
-            //     && DistanceY < doors[i].interactionBB.y / 2
-            //     && DistanceZ < doors[i].interactionBB.z / 2) {
-            //        doors[i].Event();
-            //        return modelType.DOOR;
-            //    }
-            //}
-            //#endregion
-
-            //#region Garbages
-            //for (int i = 0; i < numOfGarbages; i++) {
-            //    if (!garbages[i].obj.isDrawn)
-            //        continue;
-            //    DistanceX = Math.Abs(cam.mPosition.x - garbages[i].position.x);
-            //    DistanceY = Math.Abs(cam.mPosition.y - garbages[i].position.y);
-            //    DistanceZ = Math.Abs(cam.mPosition.z - garbages[i].position.z);
-            //    if (DistanceX < garbages[i].interactionBB.x / 2
-            //      && DistanceY < garbages[i].interactionBB.y / 2
-            //      && DistanceZ < garbages[i].interactionBB.z / 2) {
-            //        garbages[i].Event();
-            //        return modelType.GARBAGE;
-            //    }
-            //}
-            //#endregion
-
-            //#region radio check
-            //DistanceX = Math.Abs(cam.mPosition.x - radio.position.x);
-            //DistanceY = Math.Abs(cam.mPosition.y - radio.position.y);
-            //DistanceZ = Math.Abs(cam.mPosition.z - radio.position.z);
-            //if (DistanceX < radio.interactionBB.x / 2
-            //  && DistanceY < radio.interactionBB.y / 2
-            //  && DistanceZ < radio.interactionBB.z / 2) {
-            //    radio.Event();
-            //    return modelType.RADIO;
-            //}
-            //#endregion
-
-            //return modelType.NULL;
-            #endregion
         }
+      
         public void setCollisionBoundingBox(vec3 objPosition, Model3D modelObj)
         {
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
@@ -893,6 +822,7 @@ namespace Graphics
             modelObj.collisionBoundingBox.x = (maxWidth - minWidth);
             modelObj.collisionBoundingBox.y = (maxHeight - minHeight);
             modelObj.collisionBoundingBox.z = (maxDepth - minDepth);
+
             modelObj.position = objPosition;
         }
     }

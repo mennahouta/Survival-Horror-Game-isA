@@ -49,6 +49,7 @@ namespace Graphics
             #region Interaction BoundingBox intialization
             interactionBoundingBox = new vec3();
 
+
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
             float minDepth  = float.MaxValue, maxDepth  = float.MinValue;
@@ -67,6 +68,7 @@ namespace Graphics
             interactionBoundingBox.x = range * (maxWidth - minWidth);
             interactionBoundingBox.y = range * (maxHeight - minHeight);
             interactionBoundingBox.z = range * (maxDepth - minDepth);
+
             #endregion
         }
 
@@ -77,6 +79,7 @@ namespace Graphics
             interactionBoundingBox.y /= old_scaling.y;
             interactionBoundingBox.z /= old_scaling.z;
             interactionBoundingBox *= new vec3(x, y, z);
+
             old_scaling = new vec3(x, y, z);
         }
 
@@ -94,7 +97,6 @@ namespace Graphics
         public void Draw(int matID)
         {
             obj.Draw(matID);
-            isDrawn = true;
         }
 
         public void Event()

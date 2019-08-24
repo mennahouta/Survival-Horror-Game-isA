@@ -31,7 +31,7 @@ namespace Graphics
 
         Dictionary<int, Texture> textures;
 
-        public vec3 CollisionboundingBox;   //x: width, y: height, z: depth
+        public vec3 collisionBoundingBox;   //x: width, y: height, z: depth
         public vec3 position;     //center point for the transformation operations
         public Boolean isDrawn;
 

@@ -19,6 +19,7 @@ namespace Graphics
         RADIO,
         BARRELS,
         GARBAGE,
+        GUN,
         MAX_MODELS,
         NULL
     }
@@ -77,12 +78,18 @@ namespace Graphics
             interactionBoundingBox.y /= old_scaling.y;
             interactionBoundingBox.z /= old_scaling.z;
             interactionBoundingBox *= new vec3(x, y, z);
+
             old_scaling = new vec3(x, y, z);
         }
 
         public void Rotate(float angle, vec3 v)
         {
             obj.rotmatrix = glm.rotate((angle) / 180 * 3.141592f, v);
+
+            //Rotation is 90'deg, swap width and length
+            float tmp = interactionBoundingBox.x;
+            interactionBoundingBox.x = interactionBoundingBox.z;
+            interactionBoundingBox.z = tmp;
         }
 
         public void Translate(float x, float y, float z)
@@ -122,11 +129,13 @@ namespace Graphics
                 case modelType.TEXT:
                     TEXT_Event();
                     break;
+                case modelType.GUN:
+                    GUN_Event();
+                    break;
             }
         }
 
-        public void DOOR_Event()
-        {
+        public void DOOR_Event() {
             //access current loaded skybox,
             //update it, and set the renderer 
             //which room is the current
@@ -164,26 +173,23 @@ namespace Graphics
                     break;
             }
 
-            switch (Renderer.currentSkyboxID)
-            {
+            switch (Renderer.currentSkyboxID) {
                 case 0:     //0: forest skybox
-                    if (Renderer.playerHasKey)
-                    {
+                    if (Renderer.playerHasKey) {
                         Renderer.cam.Reset(612, 30, 500, 20, 20, 150, 0, 1, 0);
                         Scale(.5f, .5f, .5f);
                         Translate(700, 0, 500);
                     }
                     break;
                 case 1:     //1: livingroom skybox
-                    if (objID == 0)
-                    {
+                    if (objID == 0) {
                         Renderer.cam.Reset(95, 105, 280, 95, 50, 150, 0, 1, 0);
                         Scale(1f, 1.3f, 1f);
                         Translate(245, -17, 355);
                     }
                     else if (objID == 1) //bed -> living
                     {
-                        Renderer.cam.Reset(280, 105, 245, 20, 50, 245, 0, 1, 0);
+                        Renderer.cam.Reset(270, 105, 245, 20, 50, 245, 0, 1, 0);
                         Translate(300, 0, 245);
                     }
                     else if (objID == 2) //kitchen -> living
@@ -194,8 +200,7 @@ namespace Graphics
                     break;
                 case 2:     //2: bedroom skybox
                     Scale(1f, 1.3f, 1f);
-                    if (objID == 1)
-                    {
+                    if (objID == 1) {
                         Renderer.cam.Reset(20, 105, 245, 50, 50, 245, 0, 1, 0);
                         Translate(0, 0, 245);
                     }
@@ -206,6 +211,7 @@ namespace Graphics
                     }
                     else if (objID == 4)
                     {
+
                         Renderer.cam.Reset(270, 105, 280, 50, 50, 245, 0, 1, 0);
                         Translate(270, 0, 300);
                     }
@@ -234,6 +240,11 @@ namespace Graphics
             //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
             //player.Play();
             #endregion
+        }
+
+        public void GUN_Event()
+        {
+
         }
 
         public void GARBAGE_Event()

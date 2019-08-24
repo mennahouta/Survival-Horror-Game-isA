@@ -5,6 +5,7 @@ layout(location = 0) in vec3 vertexPosition_modelspace;
 layout(location = 1) in vec3 vertexColor;
 layout(location = 2) in vec2 texCoord;
 //read normals
+layout(location = 3) in vec3 vertexNormal_modelspace;
 
 uniform mat4 trans;
 uniform mat4 projection;
@@ -14,6 +15,8 @@ out vec3 fragColor;
 out vec2 TexCoord;
 
 //out normal_world and position_world
+out vec3 normal_worldspace;
+out vec3 position_worldspace;
 
 void main(){
 
@@ -22,7 +25,7 @@ void main(){
 	TexCoord = texCoord;
 	
 	//compute position world 
+	position_worldspace = vec3(trans * vec4(vertexPosition_modelspace,1));
 	//compute normal world 
+	normal_worldspace = normalize(vec3(trans * vec4(vertexNormal_modelspace,0)));
 }
-
-

@@ -8,10 +8,60 @@ in vec2 TexCoord;
 uniform sampler2D myTextureSampler;
 
 
+//read out values from vertex shader
+in vec3 position_worldspace;
+in vec3 normal_worldspace;
+
+//define light variables (light position, eye position, ambientlight, specular & attenuation)
+uniform vec3 LightPosition_worldspace;
+uniform vec3 EyePosition_worldspace;
+uniform vec3 ambientLight;
+uniform vec3 data; //specular .y & attenuation .x or not att .z = 0
+
+uniform vec3 Il; //light intensity
 
 void main()
 {
+
+	//L = (Lp-pos)/||(Lp-pos)||
+	vec3 lightVector = normalize(LightPosition_worldspace - position_worldspace);
+	//cos(θ) = L.N
+	float brightness = dot(lightVector,normal_worldspace);
+	//diffuse = ambientlight*Kd*cos(θ)
+	vec3 diffuseLight = vec3(brightness,brightness,brightness);
+	float Kd = 0.3f;
+	diffuseLight = Il*clamp(diffuseLight,0,1);
+
+	//Specular light calculations.
+	//R = reflect(-L,N)
+	vec3 reflectedLightVector = reflect(-lightVector,normal_worldspace);
+	//E = (eyepos - pos)/||(eyepos - pos)||
+	vec3 eyeDirectionVector = normalize(EyePosition_worldspace - position_worldspace);
+	//cos(ϕ) = R.E
+	float specularity = dot(reflectedLightVector,eyeDirectionVector);
+	//specular = ambientlight*Ks*cos(ϕ)^ns
+	float specularExponent = data.y;
+	float Ks = 0.45f;
+	specularity = pow(specularity,specularExponent);
+	vec3 specularLight = vec3(specularity,specularity,specularity);
+	specularLight = Il*Ks*clamp(specularLight,0,1);
+
+	//Compute Attenuation
+	//d = |distance(pos,Lp)|
+	float d = abs(distance(position_worldspace,LightPosition_worldspace));
+	//att = 1-(d/r) ^2   where r is maximum distance
+	float r = data.x;
+	float att = 1 - pow((d/r), 2);
+	//if att < 0 then let att = 0
+	if ( att < 0)
+		att = 0;
+	if(data.z == 0)
+		att = 1;
+	
+	//color = ambientlight + (diffuse+specular)*att
+	color = vec4(ambientLight + (diffuseLight + specularLight)*att, 1);
+	
+	//color *= texture
 	vec4 textureColor = texture(myTextureSampler, TexCoord);
-		
-	color = vec4(textureColor);
+	color = color*textureColor;
 }

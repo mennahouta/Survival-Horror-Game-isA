@@ -7,25 +7,23 @@ using GlmNet;
 using Tao.OpenGl;
 using System.IO;
 
-namespace Graphics
-{
-    class Skybox
-    {
+namespace Graphics {
+    class Skybox {
         Model up, down, right, left, back, front;
         Texture texUp, texDown, texRight, texLeft, texBack, texFront;
         public float maxX, maxY, maxZ;
 
-        public Skybox(float maxX, float maxY, float maxZ, List<String>TEX) {
+        public Skybox(float maxX, float maxY, float maxZ, List<String> TEX) {
             this.maxX = maxX;
             this.maxY = maxY;
             this.maxZ = maxZ;
 
             #region Skybox Textures
-            texUp    = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[0], 0);
-            texDown  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[1], 0);
+            texUp = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[0], 0);
+            texDown = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[1], 0);
             texRight = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[2], 0);
-            texLeft  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[3], 0);
-            texBack  = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[4], 0);
+            texLeft = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[3], 0);
+            texBack = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[4], 0);
             texFront = new Texture(Renderer.projectPath + "\\Textures\\" + TEX[5], 0);
             #endregion
 
@@ -53,6 +51,9 @@ namespace Graphics
             down.uvCoordinates.Add(new vec2(0, 0));
             down.uvCoordinates.Add(new vec2(1, 0));
 
+            for (int i = 0; i < down.vertices.Count; i++)
+                down.normals.Add(new vec3(0, 1, 0));
+
             down.Initialize();
             #endregion
 
@@ -75,6 +76,9 @@ namespace Graphics
 
             up.transformationMatrix = glm.translate(new mat4(1), new vec3(0, maxY, 0));
 
+            for (int i = 0; i < up.vertices.Count; i++)
+                up.normals.Add(new vec3(0, -1, 0));
+
             up.Initialize();
             #endregion
 
@@ -96,6 +100,9 @@ namespace Graphics
             right.uvCoordinates.Add(new vec2(0, 1));
 
             right.transformationMatrix = glm.rotate(90.0f / 180.0f * 3.141592f, new vec3(0, 0, 1));
+
+            for (int i = 0; i < right.vertices.Count; i++)
+                right.normals.Add(new vec3(0, 0, -1));
 
             right.Initialize();
             #endregion
@@ -121,6 +128,9 @@ namespace Graphics
                 glm.rotate(90.0f / 180.0f * 3.141592f, new vec3(0, 0, 1)),
                 glm.translate(new mat4(1), new vec3(maxZ, 0, 0)) }
             );
+
+            for (int i = 0; i < left.vertices.Count; i++)
+                left.normals.Add(new vec3(0, 0, 1));
 
             left.Initialize();
             #endregion
@@ -148,6 +158,9 @@ namespace Graphics
             back.uvCoordinates.Add(new vec2(0, 0));
             back.uvCoordinates.Add(new vec2(1, 0));
 
+            for (int i = 0; i < back.vertices.Count; i++)
+                back.normals.Add(new vec3(-1, 0, 0));
+
             back.Initialize();
             #endregion
 
@@ -159,7 +172,7 @@ namespace Graphics
             front.vertices.Add(v4);
             front.vertices.Add(v5);
             front.vertices.Add(v6);
-            
+
             front.texture = texFront;
             front.uvCoordinates.Add(new vec2(0, 1));
             front.uvCoordinates.Add(new vec2(1, 0));
@@ -170,13 +183,15 @@ namespace Graphics
 
             front.transformationMatrix = glm.translate(new mat4(1), new vec3(0, 0, -maxZ));
 
+            for (int i = 0; i < front.vertices.Count; i++)
+                front.normals.Add(new vec3(1, 0, 0));
+
             front.Initialize();
             #endregion
             #endregion
         }
 
-        public void Draw(int matID)
-        {
+        public void Draw(int matID) {
             down.Draw(matID);
             back.Draw(matID);
             up.Draw(matID);

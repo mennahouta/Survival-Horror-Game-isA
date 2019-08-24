@@ -26,7 +26,15 @@ namespace Graphics
     
     class Renderer : ScreenClass {
         #region Shaders declaration
-        Shader sh, sh2D;
+        Shader sh;
+        Shader sh2D;
+        #endregion
+
+        #region Interactive text declaration
+        Model obj2D;
+        Texture ch1_phone;
+        Texture ch2_paper;
+        Texture ch3_paper;
         #endregion
 
         #region Matricies declaration
@@ -80,16 +88,18 @@ namespace Graphics
         public static List<InteractiveModel> Models_Interactive;
         #endregion
 
-
         static public Camera cam;
 
         public float Speed = 1;
+
+        public static bool drawText = false;
 
         Ground g_down;
 
         List<Boolean> PrevoiuslyLoaded;
         #region 3D Models declaration
-        Model3D car, watchtower, house_obj;
+        Model3D car, watchtower, house_obj, kitchen;
+
         List<Model3D> bedroomFurni;
         List<Model3D> livingFurni;
         List<Model3D> bathroomFurni;
@@ -137,13 +147,37 @@ namespace Graphics
         float fadingValue;
         #endregion
 
-        #endregion
-
-        public override void Initialize()
-        {
-            #region Shaders intialization
+        public void Initialize()
+        {   
+            #region Shaders initialization
             sh = new Shader(projectPath + "\\Shaders\\SimpleVertexShader.vertexshader", projectPath + "\\Shaders\\SimpleFragmentShader.fragmentshader");
             sh2D = new Shader(projectPath + "\\Shaders\\2Dvertex.vertexshader", projectPath + "\\Shaders\\2Dfrag.fragmentshader");
+            #endregion
+
+            #region Interactive text initialization
+            ch1_phone = new Texture(projectPath + "\\Textures\\ch1.png", 20);
+            ch2_paper = new Texture(projectPath + "\\Textures\\ch2.png", 21);
+            ch3_paper = new Texture(projectPath + "\\Textures\\ch3.png", 22);
+
+            obj2D = new Model();
+            obj2D.vertices.Add(new vec3(-1, 1, 0));
+            obj2D.vertices.Add(new vec3(1, -1, 0));
+            obj2D.vertices.Add(new vec3(-1, -1, 0));
+            obj2D.vertices.Add(new vec3(1, 1, 0));
+            obj2D.vertices.Add(new vec3(-1, 1, 0));
+            obj2D.vertices.Add(new vec3(1, -1, 0));
+
+            obj2D.uvCoordinates.Add(new vec2(0, 0));
+            obj2D.uvCoordinates.Add(new vec2(1, 1));
+            obj2D.uvCoordinates.Add(new vec2(0, 1));
+            obj2D.uvCoordinates.Add(new vec2(1, 0));
+            obj2D.uvCoordinates.Add(new vec2(0, 0));
+            obj2D.uvCoordinates.Add(new vec2(1, 1));
+
+            obj2D.transformationMatrix = MathHelper.MultiplyMatrices(new List<mat4>{
+                glm.scale(new mat4(1), new vec3(1f, 1f, 1)),
+                glm.translate(new mat4(1), new vec3(1.5f, 1f, 0)) }
+            );
             #endregion
 
             //Gl.glClearColor(0, 0, 0.4f, 1);
@@ -225,7 +259,7 @@ namespace Graphics
             modelmatrix = glm.scale(new mat4(1), new vec3(50, 50, 50));
             #endregion
 
-            sh.UseShader();
+            //sh.UseShader();
 
             g_down = new Ground(2100, 2100, 2, 2);
 
@@ -287,7 +321,6 @@ namespace Graphics
             #endregion
 
             #region Doors initialization
-            #region Doors list
             doors = new List<InteractiveModel>()
             {
                 new InteractiveModel("door", "door", texUnit_counter%32, 15, modelType.DOOR, 0),       //0: Front door, from 0 <-> 1
@@ -298,7 +331,7 @@ namespace Graphics
                 new InteractiveModel("door", "door_in", texUnit_counter%32, 7, modelType.DOOR, 5),     //5: trapDr, from 5 ->6 (game over)
             };
             texUnit_counter++;
-            #endregion
+
             #region Transformations
             doors[0].Scale(.5f, .5f, .5f);
             for (int i = 1; i < doors.Count; i++)
@@ -310,6 +343,7 @@ namespace Graphics
             doors[3].Translate(80, 0, 0);
             doors[4].Translate(270, 0, 300);
             #endregion
+
             #region Doors collision boundingboxes
             setCollisionBoundingBox(doors[0].position, doors[0].obj);
             scaleBoundingBox(new vec3(.5f, .5f, .5f), doors[0].obj);
@@ -857,16 +891,20 @@ namespace Graphics
                 DistanceX = Math.Abs(cam.mPosition.x - Models_Interactive[i].position.x);
                 DistanceY = Math.Abs(cam.mPosition.y - Models_Interactive[i].position.y);
                 DistanceZ = Math.Abs(cam.mPosition.z - Models_Interactive[i].position.z);
-                if (DistanceX <= Models_Interactive[i].interactionBoundingBox.x / 2
-                 && DistanceY <= Models_Interactive[i].interactionBoundingBox.y / 2
-                 && DistanceZ <= Models_Interactive[i].interactionBoundingBox.z / 2) {
-                    Flush_Existing_OBJ();
+                if (DistanceX <= (cam.PersonBoundingBox.x + Models_Interactive[i].interactionBoundingBox.x) / 2
+                 && DistanceY <= (cam.PersonBoundingBox.y + Models_Interactive[i].interactionBoundingBox.y) / 2
+                 && DistanceZ <= (cam.PersonBoundingBox.z + Models_Interactive[i].interactionBoundingBox.z) / 2) {
+                    if (Models_Interactive[i].type == modelType.DOOR)
+                        Flush_Existing_OBJ();
                     Models_Interactive[i].Event();
+                    if (Models_Interactive[i].type == modelType.DOOR)
+                        Flush_Existing_OBJ();
                     return Models_Interactive[i].type;
                 }
             }
             return modelType.NULL;
         }
+
 
         public void setCollisionBoundingBox(vec3 objPosition, Model3D modelObj)
         {
@@ -888,7 +926,6 @@ namespace Graphics
             modelObj.collisionBoundingBox.x = (maxWidth - minWidth);
             modelObj.collisionBoundingBox.y = (maxHeight - minHeight);
             modelObj.collisionBoundingBox.z = (maxDepth - minDepth);
-
             modelObj.position = objPosition;
         }
 

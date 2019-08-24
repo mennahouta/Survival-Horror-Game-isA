@@ -50,12 +50,11 @@ namespace Graphics
             #region Interaction BoundingBox intialization
             interactionBoundingBox = new vec3();
 
-
-            float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
+            float minWidth = float.MaxValue, maxWidth = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
-            float minDepth  = float.MaxValue, maxDepth  = float.MinValue;
+            float minDepth = float.MaxValue, maxDepth = float.MinValue;
             foreach (Model m in obj.meshes)
-                foreach(vec3 v in m.vertices)
+                foreach (vec3 v in m.vertices)
                 {
                     minWidth = Math.Min(minWidth, v.x);
                     maxWidth = Math.Max(maxWidth, v.x);
@@ -69,7 +68,6 @@ namespace Graphics
             interactionBoundingBox.x = range * (maxWidth - minWidth);
             interactionBoundingBox.y = range * (maxHeight - minHeight);
             interactionBoundingBox.z = range * (maxDepth - minDepth);
-
             #endregion
         }
 
@@ -103,6 +101,7 @@ namespace Graphics
         public void Draw(int matID)
         {
             obj.Draw(matID);
+            isDrawn = true;
         }
 
         public void Event()
@@ -140,21 +139,20 @@ namespace Graphics
             //access current loaded skybox,
             //update it, and set the renderer 
             //which room is the current
-
-            switch (objID) {
+            switch (objID)
+            {
                 case 0:
-                    if (Renderer.playerHasKey) {
-                        if (Renderer.currentSkyboxID == 0) {
+                    if (Renderer.playerHasKey)
+                    {
+                        if (Renderer.currentSkyboxID == 0)
+                        {
                             Renderer.currentSkyboxID = 1;
-                            //interactionBoundingBox /= range;
-                            //range = 7;
-                            //interactionBoundingBox *= range;
+                            range = 7;
                         }
-                        else if (Renderer.currentSkyboxID == 1) {
+                        if (Renderer.currentSkyboxID == 1)
+                        {
                             Renderer.currentSkyboxID = 0;
-                            //interactionBoundingBox /= range;
-                            //range = 20;
-                            //interactionBoundingBox *= range;
+                            range = 30;
                         }
                     }
                     break;
@@ -206,11 +204,14 @@ namespace Graphics
                         Renderer.cam.Reset(20, 105, 245, 50, 50, 245, 0, 1, 0);
                         Translate(0, 0, 245);
                     }
-                    else if (objID == 3) {
+                    else if (objID == 3)
+                    {
                         Renderer.cam.Reset(80, 105, 20, 50, 50, 245, 0, 1, 0);
                         Translate(80, 0, 0);
                     }
-                    else if (objID == 4) {
+                    else if (objID == 4)
+                    {
+
                         Renderer.cam.Reset(270, 105, 280, 50, 50, 245, 0, 1, 0);
                         Translate(270, 0, 300);
                     }
@@ -313,7 +314,6 @@ namespace Graphics
                 radio_ON = true;
             }
         }
-
         public void TEXT_Event()
         {
             //open a certain text file and display

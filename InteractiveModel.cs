@@ -19,6 +19,7 @@ namespace Graphics
         RADIO,
         BARRELS,
         GARBAGE,
+        GUN,
         MAX_MODELS,
         NULL
     }
@@ -49,6 +50,7 @@ namespace Graphics
             #region Interaction BoundingBox intialization
             interactionBoundingBox = new vec3();
 
+
             float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
             float minDepth  = float.MaxValue, maxDepth  = float.MinValue;
@@ -67,6 +69,7 @@ namespace Graphics
             interactionBoundingBox.x = range * (maxWidth - minWidth);
             interactionBoundingBox.y = range * (maxHeight - minHeight);
             interactionBoundingBox.z = range * (maxDepth - minDepth);
+
             #endregion
         }
 
@@ -77,12 +80,18 @@ namespace Graphics
             interactionBoundingBox.y /= old_scaling.y;
             interactionBoundingBox.z /= old_scaling.z;
             interactionBoundingBox *= new vec3(x, y, z);
+
             old_scaling = new vec3(x, y, z);
         }
 
         public void Rotate(float angle, vec3 v)
         {
             obj.rotmatrix = glm.rotate((angle) / 180 * 3.141592f, v);
+
+            //Rotation is 90'deg, swap width and length
+            float tmp = interactionBoundingBox.x;
+            interactionBoundingBox.x = interactionBoundingBox.z;
+            interactionBoundingBox.z = tmp;
         }
 
         public void Translate(float x, float y, float z)
@@ -94,7 +103,6 @@ namespace Graphics
         public void Draw(int matID)
         {
             obj.Draw(matID);
-            isDrawn = true;
         }
 
         public void Event()
@@ -122,6 +130,9 @@ namespace Graphics
                 case modelType.TEXT:
                     TEXT_Event();
                     break;
+                case modelType.GUN:
+                    GUN_Event();
+                    break;
             }
         }
 
@@ -129,16 +140,21 @@ namespace Graphics
             //access current loaded skybox,
             //update it, and set the renderer 
             //which room is the current
+
             switch (objID) {
                 case 0:
                     if (Renderer.playerHasKey) {
                         if (Renderer.currentSkyboxID == 0) {
                             Renderer.currentSkyboxID = 1;
-                            range = 7;
+                            //interactionBoundingBox /= range;
+                            //range = 7;
+                            //interactionBoundingBox *= range;
                         }
-                        if (Renderer.currentSkyboxID == 1) {
+                        else if (Renderer.currentSkyboxID == 1) {
                             Renderer.currentSkyboxID = 0;
-                            range = 30;
+                            //interactionBoundingBox /= range;
+                            //range = 20;
+                            //interactionBoundingBox *= range;
                         }
                     }
                     break;
@@ -175,7 +191,7 @@ namespace Graphics
                     }
                     else if (objID == 1) //bed -> living
                     {
-                        Renderer.cam.Reset(280, 105, 245, 20, 50, 245, 0, 1, 0);
+                        Renderer.cam.Reset(270, 105, 245, 20, 50, 245, 0, 1, 0);
                         Translate(300, 0, 245);
                     }
                     else if (objID == 2) //kitchen -> living
@@ -223,6 +239,11 @@ namespace Graphics
             //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
             //player.Play();
             #endregion
+        }
+
+        public void GUN_Event()
+        {
+
         }
 
         public void GARBAGE_Event()

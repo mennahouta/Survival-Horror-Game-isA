@@ -17,7 +17,7 @@ namespace Graphics {
         LoadScreen loadScreen = new LoadScreen();
         Renderer renderer = new Renderer();
         Thread MainLoopThread;
-
+      
         List<String> garbageMessages = new List<string>(){
             "You have found the key, I'm impressed!",
             "Garbage. Garbage everywhere.",
@@ -25,7 +25,7 @@ namespace Graphics {
             "People can be very messy.",
             "You're going to be very smelly."
         };
-
+      
         float deltaTime;
         public GraphicsForm(string currScreen) {
             currentScreen = currScreen;
@@ -70,7 +70,7 @@ namespace Graphics {
                 loadScreen.Draw();
             while (true) {
                 try {
-                    renderer.Flush_Existing_IOBJ();
+                    //renderer.Flush_Existing_IOBJ();
                     renderer.Draw();
                     renderer.Update(deltaTime);
                 }
@@ -107,7 +107,8 @@ namespace Graphics {
                 this.Close();
             }
 
-            if (currentScreen == "renderer") {
+            if (currentScreen == "renderer") 
+            {
                 float speed = 3f;
                 if (e.KeyChar == 'a')
                     Renderer.cam.Strafe(-speed);
@@ -122,7 +123,8 @@ namespace Graphics {
                 if (e.KeyChar == 'c')
                     Renderer.cam.Fly(speed);
                 if (e.KeyChar == 'e') {
-                    try {
+                    try 
+                    {
                         modelType currentInteractionType = renderer.InteractiveCheck();
 
                         #region Garbage interaction
@@ -135,12 +137,10 @@ namespace Graphics {
                             }
                         }
                         #endregion
-
                     }
                     catch { }
                 }
             }
-
         }
 
         float prevX, prevY;

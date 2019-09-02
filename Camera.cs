@@ -18,7 +18,7 @@ namespace Graphics
         mat4 mViewMatrix;
         mat4 mProjectionMatrix;
         float PersonHeight;
-        vec3 PersonBoundingBox = new vec3(0, 0, 0);
+        public vec3 PersonBoundingBox = new vec3(0, 0, 0);
         public static bool Move = false;
 
         public Camera()
@@ -135,14 +135,12 @@ namespace Graphics
                 DistanceX = Math.Abs(result.x - Renderer.Models_3D[i].position.x);
                 DistanceY = Math.Abs(result.y - Renderer.Models_3D[i].position.y);
                 DistanceZ = Math.Abs(result.z - Renderer.Models_3D[i].position.z);
-              
                 if (DistanceX < (PersonBoundingBox.x + Renderer.Models_3D[i].collisionBoundingBox.x) / 2
                  && DistanceY < (PersonBoundingBox.y + Renderer.Models_3D[i].collisionBoundingBox.y) / 2
                  && DistanceZ < (PersonBoundingBox.z + Renderer.Models_3D[i].collisionBoundingBox.z) / 2)
                     return false;
             }
-            for (int i = 0; i < Renderer.Models_Interactive.Count; i++)
-            {
+            for (int i = 0; i < Renderer.Models_Interactive.Count; i++) {
                 if (!Renderer.Models_Interactive[i].obj.isDrawn)
                     continue;
                 DistanceX = Math.Abs(result.x - Renderer.Models_Interactive[i].obj.position.x);
@@ -151,7 +149,6 @@ namespace Graphics
                 if (DistanceX < (PersonBoundingBox.x + Renderer.Models_Interactive[i].obj.collisionBoundingBox.x) / 2
                  && DistanceY < (PersonBoundingBox.y + Renderer.Models_Interactive[i].obj.collisionBoundingBox.y) / 2
                  && DistanceZ < (PersonBoundingBox.z + Renderer.Models_Interactive[i].obj.collisionBoundingBox.z) / 2)
-
                     return false;
             }
             return true;
@@ -159,24 +156,33 @@ namespace Graphics
 
         public void Walk(float dist)
         {
-            if (!checkPos(dist, 0) || !checkCollision(dist, 0))
+            if (!checkPos(dist, 0) || !checkCollision(dist, 0) || Renderer.text_shown)
+            {
+                Move = false;
                 return;
+            }
             mPosition += dist * mDirection;
             mPosition.y = PersonHeight;
             Move = true;
         }
         public void Strafe(float dist)
         {
-            if (!checkPos(dist, 1) || !checkCollision(dist, 1))
+            if (!checkPos(dist, 1) || !checkCollision(dist, 1) || Renderer.text_shown)
+            {
+                Move = false;
                 return;
+            }
             mPosition += dist * mRight;
             mPosition.y = PersonHeight;
             Move = true;
         }
         public void Fly(float dist)
         {
-            if (!checkPos(dist, 2) || !checkCollision(dist, 2))
+            if (!checkPos(dist, 2) || !checkCollision(dist, 2) || Renderer.text_shown)
+            {
+                Move = false;
                 return;
+            }
             mPosition += dist * mUp;
             mPosition.y = PersonHeight;
             Move = true;

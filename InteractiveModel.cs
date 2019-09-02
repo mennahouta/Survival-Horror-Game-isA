@@ -33,8 +33,8 @@ namespace Graphics
         public modelType type;
         public int objID;
         public static bool radio_ON = false; // for the interaction with the radio
-        //System.Media.SoundPlayer radio_sound = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\radio-recording.wav");
-        //System.Media.SoundPlayer player;
+        System.Media.SoundPlayer radio_sound = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\radio-recording.wav");
+        System.Media.SoundPlayer player;
         vec3 old_scaling = new vec3(1, 1, 1);
 
         public InteractiveModel(String folderName, String modelName, int texUnit, float rangeOfInteraction, modelType t, int ID)
@@ -50,11 +50,11 @@ namespace Graphics
             #region Interaction BoundingBox intialization
             interactionBoundingBox = new vec3();
 
-            float minWidth = float.MaxValue, maxWidth = float.MinValue;
+            float minWidth  = float.MaxValue, maxWidth  = float.MinValue;
             float minHeight = float.MaxValue, maxHeight = float.MinValue;
-            float minDepth = float.MaxValue, maxDepth = float.MinValue;
+            float minDepth  = float.MaxValue, maxDepth  = float.MinValue;
             foreach (Model m in obj.meshes)
-                foreach (vec3 v in m.vertices)
+                foreach(vec3 v in m.vertices)
                 {
                     minWidth = Math.Min(minWidth, v.x);
                     maxWidth = Math.Max(maxWidth, v.x);
@@ -78,7 +78,6 @@ namespace Graphics
             interactionBoundingBox.y /= old_scaling.y;
             interactionBoundingBox.z /= old_scaling.z;
             interactionBoundingBox *= new vec3(x, y, z);
-
             old_scaling = new vec3(x, y, z);
         }
 
@@ -135,7 +134,8 @@ namespace Graphics
             }
         }
 
-        public void DOOR_Event() {
+        public void DOOR_Event()
+        {
             //access current loaded skybox,
             //update it, and set the renderer 
             //which room is the current
@@ -147,12 +147,16 @@ namespace Graphics
                         if (Renderer.currentSkyboxID == 0)
                         {
                             Renderer.currentSkyboxID = 1;
-                            range = 7;
+                            //interactionBoundingBox /= range;
+                            //range = 7;
+                            //interactionBoundingBox *= range;
                         }
-                        if (Renderer.currentSkyboxID == 1)
+                        else if (Renderer.currentSkyboxID == 1)
                         {
                             Renderer.currentSkyboxID = 0;
-                            range = 30;
+                            //interactionBoundingBox /= range;
+                            //range = 20;
+                            //interactionBoundingBox *= range;
                         }
                     }
                     break;
@@ -173,16 +177,19 @@ namespace Graphics
                     break;
             }
 
-            switch (Renderer.currentSkyboxID) {
+            switch (Renderer.currentSkyboxID)
+            {
                 case 0:     //0: forest skybox
-                    if (Renderer.playerHasKey) {
+                    if (Renderer.playerHasKey)
+                    {
                         Renderer.cam.Reset(612, 30, 500, 20, 20, 150, 0, 1, 0);
                         Scale(.5f, .5f, .5f);
                         Translate(700, 0, 500);
                     }
                     break;
                 case 1:     //1: livingroom skybox
-                    if (objID == 0) {
+                    if (objID == 0)
+                    {
                         Renderer.cam.Reset(95, 105, 280, 95, 50, 150, 0, 1, 0);
                         Scale(1f, 1.3f, 1f);
                         Translate(245, -17, 355);
@@ -200,7 +207,8 @@ namespace Graphics
                     break;
                 case 2:     //2: bedroom skybox
                     Scale(1f, 1.3f, 1f);
-                    if (objID == 1) {
+                    if (objID == 1)
+                    {
                         Renderer.cam.Reset(20, 105, 245, 50, 50, 245, 0, 1, 0);
                         Translate(0, 0, 245);
                     }
@@ -211,7 +219,6 @@ namespace Graphics
                     }
                     else if (objID == 4)
                     {
-
                         Renderer.cam.Reset(270, 105, 280, 50, 50, 245, 0, 1, 0);
                         Translate(270, 0, 300);
                     }
@@ -234,11 +241,14 @@ namespace Graphics
             }
 
             #region SFX
-            //player = new System.Media.SoundPlayer(Renderer.projectPath+@"\Sounds\door open with a squeak.wav");
-            //player.Play();
-            //Thread.Sleep(2948);
-            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
-            //player.Play();
+            if (Renderer.playerHasKey)
+            {
+                player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door open with a squeak.wav");
+                player.Play();
+                Thread.Sleep(2948);
+                player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\door close with a squeak.wav");
+                player.Play();
+            }
             #endregion
         }
 
@@ -250,16 +260,17 @@ namespace Graphics
         public void GARBAGE_Event()
         {
             #region SFX
-            //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\light_plasticbag_search.wav");
-            //player.Play();
-            //Thread.Sleep(17500);
+            player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\light_plasticbag_search.wav");
+            player.Play();
+            Thread.Sleep(4000);
+            player.Stop();
             #endregion
 
             if (objID == Renderer.key_garbageID)
             {
                 Renderer.playerHasKey = true;
-                //player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\keys.wav");
-                //player.Play();
+                player = new System.Media.SoundPlayer(Renderer.projectPath + @"\Sounds\keys.wav");
+                player.Play();
             }
         }
 
@@ -305,19 +316,21 @@ namespace Graphics
             //the static noise
             if (radio_ON)
             {
-                //radio_sound.Stop();
+                radio_sound.Stop();
                 radio_ON = false;
             }
             else
             {
-                //radio_sound.PlayLooping();
+                radio_sound.PlayLooping();
                 radio_ON = true;
             }
         }
+
         public void TEXT_Event()
         {
             //open a certain text file and display
             //its text on the screen
+            Renderer.text_shown = true;
         }
 
     }
